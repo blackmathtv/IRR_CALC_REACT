@@ -56,6 +56,7 @@ const [theNpv, setNpv] = React.useState(0);
       <button name="cashFlowBtn" onClick ={(handleCashFlows)}>Add Cash Flow</button>
     </div>
 
+
   </div>
     
   )
@@ -76,7 +77,7 @@ const [theNpv, setNpv] = React.useState(0);
      modCashFlows.push(discountedFlow);
      npv += discountedFlow;
     }
-    GetDrawData(modCashFlows);
+  
     console.log("r " + r);
     console.log("cashflows " + cashFlows);
     console.log("initial Invest " + initialInvest);
