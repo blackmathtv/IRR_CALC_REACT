@@ -38,12 +38,18 @@ function GetDrawData () {
             drawBoxWidth: 200,
             allBarValues: [],
             drawBarHeights: [],
-            viewHeightMultiplier: null
+            viewHeightMultiplier: null,
+            barWidth: null,
+            barPadX: null,
+            glassPad: null,
+            doubleGlassPad: null,
+            barPosx: null,
+            barCanvas: null
         }
     }
     
     for (var value in modCashFlows) {
-        if (modCashFlows[value] > 0) {
+        if (modCashFlows[value] >= 0) {
             drawData.values.allBarValues.push(modCashFlows[value]);
             
         }
@@ -57,7 +63,7 @@ function GetDrawData () {
     
     
     for (var value in modCashFlows) {
-        if (modCashFlows[value] > 0) {
+        if (modCashFlows[value] >= 0) {
             drawData.values.drawBarHeights.push(modCashFlows[value] * drawData.values.viewHeightMultiplier);
             drawData.points.numPoints.pos +=1;
         }
@@ -67,42 +73,16 @@ function GetDrawData () {
         } 
     }
 
-    const barWidth = (drawData.values.drawBoxWidth / (drawData.values.drawBarHeights.length) / 1.5);
-    const barPadX = barWidth / 2;
-    const glassPad = Math.min(barPadX / 4, 2);
-    const doubleGlassPad = glassPad * 2;
-    drawData.rectangles.betweenGlass = barPadX - doubleGlassPad;
-    let barPosX = (barPadX / 2);
-    const barCanvas = drawData.values.drawBoxHeight - 4;
+    drawData.values.barWidth = (drawData.values.drawBoxWidth / (drawData.values.drawBarHeights.length) / 1.5);
+    drawData.values.barPadx = drawData.values.barWidth / 2;
+    drawData.values.glassPad = Math.min(drawData.values.barPadx / 4, 2);
+    drawData.values.doubleGlassPad = drawData.values.glassPad * 2;
+    drawData.rectangles.betweenGlass = drawData.values.barPadx - drawData.values.doubleGlassPad;
+    drawData.values.barPosX = (drawData.values.barPadx / 2);
+    drawData.values.barCanvas = drawData.values.drawBoxHeight - 4;
 
     //push svg data for bars
-    for (var value in drawData.values.drawBarHeights) {
-        let key = value;
-        if (drawData.values.drawBarHeights[value] > 0) {  
-            drawData.rectangles.bars.push(getRectangleSVG(key, [barPosX, barCanvas - drawData.values.drawBarHeights[value]], barWidth, drawData.values.drawBarHeights[value], "blue"));
-            drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [barPosX - glassPad, 2], barWidth + doubleGlassPad, 96, "none", "black", .3, 1));
-            drawData.points.wavePoints.push([barPosX, barCanvas - drawData.values.drawBarHeights[value]]);
-            drawData.points.wavePoints.push([barPosX + barWidth, barCanvas - drawData.values.drawBarHeights[value]]);
-            
-            drawData.points.negWavePoints.push([barPosX, drawData.values.drawBoxHeight]);
-            drawData.points.negWavePoints.push([barPosX + barWidth, drawData.values.drawBoxHeight]);
-            
-            barPosX += (barWidth + barPadX);
-        }
-        else if (drawData.values.drawBarHeights[value] < 0) {
-            drawData.rectangles.bars.push(getRectangleSVG(key, [barPosX, barCanvas - (drawData.values.drawBarHeights[value] * -1)], barWidth, (drawData.values.drawBarHeights[value] * -1), "red"));
-            drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [barPosX - glassPad, 2], barWidth + doubleGlassPad, 96, "none", "black", .3, 1));
 
-            drawData.points.negWavePoints.push([barPosX, barCanvas - drawData.values.drawBarHeights[value] * -1]);
-            drawData.points.negWavePoints.push([barPosX + barWidth, barCanvas - drawData.values.drawBarHeights[value] * -1]);
-            
-            drawData.points.wavePoints.push([barPosX, drawData.values.drawBoxHeight]);
-            drawData.points.wavePoints.push([barPosX + barWidth, drawData.values.drawBoxHeight]);
-            
-            barPosX += (barWidth + barPadX);
-            
-        }
-    }
 
     
 

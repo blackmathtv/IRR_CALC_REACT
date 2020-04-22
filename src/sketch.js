@@ -1,22 +1,16 @@
 import React from 'react';
-
-//import { motion, useAnimatedState } from "framer-motion";
 import DrawSmooth  from "./bezierInterp.js";
 import GetDrawData from "./drawData.js"
 import { spring } from 'popmotion';
-
-
-//const barValues = [-80,70,-10,20,40,-20,60];
-const testPoints = [[20, 30], [40, 80], [60,10], [80, 60],[100, 30], [120, 80], [140,10], [160, 60]];
-const testPath = DrawSmooth(testPoints);
+import { styles } from './App.js'
+ 
 const canvasHeight = window.innerHeight/2;
 const canvasWidth = canvasHeight * 2;
 const pathSettle = 50;
-var points = [];
+
 let updateData = true;
 let animDrawData = [];
 let drawData = [];
-console.log(canvasWidth + " canvas width");
 
 function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, strokeWidth, radius) {
   return(
@@ -33,62 +27,66 @@ function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, st
 }
 
 function Sketch(){
-  
-  //const [activeDrawData, setActiveDrawData] = useState(drawData);
-  //const drawData = () => { return GetDrawData() };
-  const [testVar, setTestVar] = React.useState(0);
-  const [aTestPath, setATestPath] = React.useState();
+  console.log("Ran Sketch");  
+  const [path, setpath] = React.useState();
 
   if (updateData){
     drawData = GetDrawData();
-    
+    //push wave points and rectange svg to local drawData
+    for (var value in drawData.values.drawBarHeights) {
+      let key = value;
+      if (drawData.values.drawBarHeights[value] >= 0) {  
+          drawData.rectangles.bars.push(getRectangleSVG(key, [drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value]], drawData.values.barWidth, drawData.values.drawBarHeights[value], styles.barGray));
+          drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [drawData.values.barPosX - drawData.values.glassPad, 2], drawData.values.barWidth + drawData.values.doubleGlassPad, 96, "none", styles.gray, .3, 1));
+          
+          //drawData.points.wavePoints.push([drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value]]);
+          drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value]]);         
+          //drawData.points.negWavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
+          drawData.points.negWavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.drawBoxHeight]);
+          
+          drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
+      }
+      else if (drawData.values.drawBarHeights[value] < 0) {
+          drawData.rectangles.bars.push(getRectangleSVG(key, [drawData.values.barPosX, drawData.values.barCanvas - (drawData.values.drawBarHeights[value] * -1)], drawData.values.barWidth, (drawData.values.drawBarHeights[value] * -1), styles.negativeColor));
+          drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [drawData.values.barPosX - drawData.values.glassPad, 2], drawData.values.barWidth + drawData.values.doubleGlassPad, 96, "none", styles.gray, .3, 1));
+
+          //drawData.points.negWavePoints.push([drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value] * -1]);
+          drawData.points.negWavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value] * -1]);
+          //  drawData.points.wavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
+          drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.drawBoxHeight]);
+          
+          drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
+          
+      }
+    }
   }
   else {
     drawData = animDrawData;
   }
   
-  //const drawData = GetDrawData();
-  //console.log(activeDrawData);
-  console.log("Ran Sketch");
- 
-  
-  
-
-  //const [wavePoints, setWavePoints] = useState(points);
-  
-  //const [animatedPath, setAnimatedPath] = useAnimatedState(DrawSmooth(GetDrawData().points.wavePoints, 1));
-
-  
-
- async function runSpring() {  
-    
-    // for (let point in drawData.points.wavePoints) {
-    //   spring({ from: 0, to: 100 })
-    //     .start(v => drawData.points.wavePoints[point][1] = v)
-    //     console.log(drawData.points.wavePoints);
-        
-    // }
+  async function runSpring() {    
     for (let point in drawData.points.wavePoints) {
-     
-      
       spring({ from: drawData.points.wavePoints[point][1], to: pathSettle, stiffness: 150, damping: 5 })
-          .start(v => {drawData.points.wavePoints[point][1] = v; setATestPath(DrawSmooth(drawData.points.wavePoints, 1))})
+          .start(v => {drawData.points.wavePoints[point][1] = v; setpath(DrawSmooth(drawData.points.wavePoints, 1))})
     }
   }
-  //wavePoints[0] = [200,100]
+
   return(
     <div>
       <svg
         style={{
-        background: '#333',
-        width: canvasWidth, 
-        height: canvasHeight 
+        position: "absolute",
+        background: 'none',
+        top: "10%",
+        left: "5%",
+        width: "90%", 
+        height: "80%"
         }}
         viewBox="0 0 200 100"
-        >{drawData.rectangles.bars}{drawData.rectangles.glass}{aTestPath}
+        >{drawData.rectangles.bars}{drawData.rectangles.glass}{path}
       </svg>
       <div>
-      <button name="animate" onClick ={ () => {updateData= false; animDrawData = GetDrawData(); runSpring()}}>Animate Waves</button>{testVar}  
+      {/* <button name="animate" onClick ={ () => {updateData= false; animDrawData = drawData; runSpring()}}>Animate Waves</button>   */}
       
       </div>
     </div>
