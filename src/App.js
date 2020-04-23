@@ -1,16 +1,28 @@
 import React from 'react';
 import Sketch from './sketch'
 import './App.css';
+import Graph from './graph.js';
 import GetDrawData from "./drawData.js";
+import Button from '@material-ui/core/Button';
 export var modCashFlows = [];
 
 
-let currentCFValue = null;
+
 let cashFlows = [0];
-let initialInvest = 0;
-let cashFlowString = "";
+
+
 let canvasWidth = window.innerWidth * .9;
 let canvasHeight = canvasWidth/2.32;
+let loggedNPVs = [];
+
+export let calcData = {
+  initialInvest: 0,
+  modCashFlows: [],
+  theNPV: [],
+  npvSnap: [],
+  snapGraphX: 0,
+  r: 50
+};
 export let styles = {
   canvasWidth: canvasWidth,
   canvasHeight: canvasHeight,
@@ -19,11 +31,13 @@ export let styles = {
   textColor: "#000000",
   innerCashBoxColor: "#FBFBFB",
   medLightGray: "#D8D8D8",
-  negativeColor: "#FF2223",
-  positiveColor: "#4E556A",
+  negativeColor: "#F50057",
+  positiveColor: "#27293E",
   darkGray: "#3A3A3A",
   gray: "#ACACAC",
-  barGray: "#4E556A"
+  irrColor: "#53DD6C",
+  npvBtnColor: "#57A773"
+ 
 
 }
 
@@ -46,7 +60,7 @@ const cashFlowBox = {
   background: styles.lightCanvasColor,
   height: "56%",
   width: "17%",
-  borderRadius: 15
+  borderRadius: "1vw"
 }
 
 const dRateBox = {
@@ -56,7 +70,7 @@ const dRateBox = {
   background: styles.lightCanvasColor,
   height: "17%",
   width: "17%",
-  borderRadius: 15
+  borderRadius: "1vw"
 }
 
 const sketchBox = {
@@ -66,7 +80,7 @@ const sketchBox = {
   background: styles.lightCanvasColor,
   height: "77%",
   width: "52%",
-  borderRadius: 15
+  borderRadius: "1vw"
 }
 
 const historyBox = {
@@ -76,7 +90,18 @@ const historyBox = {
   background: styles.lightCanvasColor,
   height: "77%",
   width: "17%",
-  borderRadius: 15 
+  borderRadius: "1vw" 
+}
+
+const innerHistoryBox = {
+  position: "absolute",
+  top: "65%", 
+  background: styles.innerCashBoxColor,
+  height: "15%",
+  width: "100%",
+  overflowY: "scroll",
+  overflowX: "auto"
+  //fontWeight: "800"
 }
 
 const historyBoxDelete = {
@@ -104,7 +129,7 @@ const cashContents = {
   fontSize: "2vw",
   width: "100%",
   height:"2.6vw",
-  color: styles.barGray
+  color: styles.positiveColor
 }
 const negCashContents = { 
   fontSize: "2vw",
@@ -170,9 +195,10 @@ const cashInputStyle = {
   background: "none",
   width: "57%",
   height: "14%",
+  left: "27%",
   fontSize: "2vw",
   border: "none",
-  color: styles.barGray
+  color: styles.positiveColor
 }
 
 const negCashInputStyle = {
@@ -180,6 +206,7 @@ const negCashInputStyle = {
   background: "none",
   width: "57%",
   height: "14%",
+  left: "25%",
   fontSize: "2vw",
   border: "none",
   color: styles.negativeColor
@@ -213,7 +240,8 @@ const plusBtnContainer= {
 }
 const cashBtmTxt = {
   position: "absolute",
-  left: "28%"
+  left: "28%",
+ 
 }
 
 const sliderStyle = {
@@ -221,11 +249,30 @@ const sliderStyle = {
   top: "40%",
   left: "18%",
   background: "styles.canvasColor",
+  cursor: "pointer",
   width: "60%"
 }
 
 
 
+const snapButtonPos = {
+  position: "absolute",
+  bottom: "15%",
+  left: "17%"
+}
+const histTitle = {
+  position: "absolute",
+  fontSize: "1vw",
+  bottom: "33%",
+  left: "8%",
+}
+
+const histTitle2 = {
+  position: "absolute",
+  fontSize: "1vw",
+  bottom: "33%",
+  right: "16%",
+}
 
 
 
@@ -233,10 +280,6 @@ function App() {
 
 
 
-//rerender the DOM when r changes
-const [r, setr] = React.useState(50);
-//rerender the DOM when theNPV changes
-const [theNpv, setNpv] = React.useState(0);
 //hook that makes sure dom is rerendered if a button is clicked, even if theNpv hasn't changed
 const [npvRan, setNpvRan] = React.useState(0);
 
@@ -251,7 +294,7 @@ let zeroCashInputStyle = {
 }
 function minusButton(value) {
   return(
-      <svg height="1.2vw" width="2vw" onClick= {() => {cashFlows.splice(value,1); setNpv(findNPV(cashFlows, r, initialInvest))} } >
+      <svg height="1.2vw" width="2vw" onClick= {() => {cashFlows.splice(value,1); findNPV(cashFlows, calcData.r, calcData.initialInvest)} } >
   
         <circle style={minusButtonStyle} cx="56%" cy="50%" r="32%"/>
         <line style={minusLineStyle} x1="44%" y1="50%" x2="67%" y2="50%"/>    
@@ -262,34 +305,68 @@ function minusButton(value) {
  
 function cashFlowPlusBtn() {
   return(
-    <svg height="1.5vw" width="1.5vw" style={plusBtnContainer} onClick= {() => {cashFlows.push(0); setNpv(findNPV(cashFlows, r, initialInvest))} } >   
-      <circle style={plusButtonStyle} cx="50%" cy="50%" r="45%"/>
-      <line style={plusLineStyle} x1="25%" y1="50%" x2="75%" y2="50%"/>    
-      <line style={plusLineStyle} x1="50%" y1="75%" x2="50%" y2="25%"/> 
+    <svg height="1.7vw" width="1.7vw" style={plusBtnContainer} onClick= {() => {if (calcData.initialInvest != ""){ cashFlows.push(0); findNPV(cashFlows, calcData.r, calcData.initialInvest)}} } >   
+      <circle style={plusButtonStyle} cx="50%" cy="50%" r="38%"/>
+      <line style={plusLineStyle} x1="30%" y1="50%" x2="70%" y2="50%"/>    
+      <line style={plusLineStyle} x1="50%" y1="70%" x2="50%" y2="30%"/> 
     </svg>
-)
-  
+  ) 
 }
 
-//console.log("r " + r);
+function dollSymbol(value, color) {
+  let numSize = .6; 
+  let numX = "39%";
+  let numY = "86%";
+  if (value > 9) {
+    numSize= .5;
+    numX = "31%"
+    numY = "85%"
+  }
+ 
+  return(
+    <svg style={{position: "absolute", background: "none"}} height="2.6vw" width="1.5vw" >
+      <text style={{fontSize: "2.2vw", fontWeight: "400", fill: color}} x="4%" y="80%">$</text>
+      <circle style={{fill: color}} cx="52%" cy="78%" r="18%"/>
+      <text style={{fontSize: numSize + "vw", fontWeight: "700", fill: styles.innerCashBoxColor}} x={numX} y={numY}>{value}</text>
+    </svg>
+  ) 
+}
+function snapNPVBtn() {
+  return (<Button style={{position: "absolute", width: "10vw", fontSize: "1.5vw", color: styles.darkGray, fontFamily: 'Fira Code',  border: "1px solid", padding: ".2vw"}} variant="outlined"  onClick ={ () => {calcData.npvSnap.unshift({x: calcData.r, y: calcData.theNPV }); logNPV(); setNpvRan(npvRan + 1); }} disableElevation >FIND NPV</Button>)
+  //return (<button style={snapNPVBtnStyle} name="npvsnap" onClick ={ () => {calcData.npvSnap.push({x: calcData.r, y: calcData.theNPV }); calcData.snapGraphX++; setNpvRan(npvRan + 1); }}>FIND NPV</button>  )
+}
+
+function logNPV() {
+ 
+  loggedNPVs.unshift(
+    <div style={{ paddingLeft:"6%"}}>
+      <p style={{ }}>{calcData.theNPV.toFixed(2)}{"_____________"}{calcData.r}%</p><p style = {{float: "right", display: "inline"}}></p>
+    </div>
+  )
+}
+
 function CashFlowContents() {
-  if (initialInvest === "") {
+  let dollColor = styles.negativeColor;
+
+  if (calcData.initialInvest === "") {
     zeroCashInputStyle.fontSize = ".8vw";
   }
-  else if (initialInvest >= 0 && initialInvest != "") {
+  else if (calcData.initialInvest >= 0 && calcData.initialInvest != "") {
     zeroCashInputStyle.fontSize = "2vw";
     zeroCashInputStyle.color = styles.negativeColor;
   }
-  else if (initialInvest < 0) {
+  else if (calcData.initialInvest < 0) {
     zeroCashInputStyle.fontSize = "2vw";
     zeroCashInputStyle.color = styles.positiveColor;
+    dollColor = styles.positiveColor;
   }
   let contents = [];
-  console.log("initial invest" + initialInvest);
+
       contents.push(
         <div>
+          <div style={{position: "absolute", left: "2%", bottom: "100%"}}>{dollSymbol(0, dollColor)}</div>
           <div style={negInitialInvStyle}>        
-            <input style={zeroCashInputStyle} placeholder="<Enter Initial Investment Here>"  key={"inINVhold"}  type="text" name ={"initialInv"} onChange={(event) => {initialInvest = event.target.value; setNpv(findNPV(cashFlows, r, initialInvest)) }} />  
+            <input style={zeroCashInputStyle} placeholder="<Enter Initial Investment Here>"  key={"inINVhold"}  type="text" name ={"initialInv"} onChange={(event) => {calcData.initialInvest = event.target.value; findNPV(cashFlows, calcData.r, calcData.initialInvest)}} />  
           </div>
           <div style={lineBreak}/>
         </div>
@@ -303,8 +380,8 @@ function CashFlowContents() {
         <div>
           <div style={negCashContents}>
             {minusButton(value)} 
-            $ {' '}  
-            <input style={negCashInputStyle} key={"cashflow" + value} value={cashFlows[value]} type="text" name ={value + "cashFlow"} onChange={(event) => {cashFlows[value] = event.target.value; setNpv(findNPV(cashFlows, r, initialInvest))}} />  
+            {dollSymbol(parseInt(value) + 1, styles.negativeColor)}  
+            <input style={negCashInputStyle} key={"cashflow" + value} value={cashFlows[value]} type="text" name ={value + "cashFlow"} onChange={(event) => {cashFlows[value] = event.target.value; findNPV(cashFlows, calcData.r, calcData.initialInvest)}} />  
           </div>
           <div style={lineBreak}/>
         </div>
@@ -316,8 +393,8 @@ function CashFlowContents() {
       <div>
         <div style={cashContents} >
           {minusButton(value)} 
-          $ {' '}  
-          <input style={cashInputStyle} key={"cashflow" + value} value={cashFlows[value]} type="text" name ={value + "cashFlow"} onChange={(event) => {cashFlows[value] = event.target.value; setNpv(findNPV(cashFlows, r, initialInvest))}} />  
+          {dollSymbol(parseInt(value) + 1, styles.positiveColor)}   
+          <input style={cashInputStyle} key={"cashflow" + value} value={cashFlows[value]} type="text" name ={value + "cashFlow"} onChange={(event) => {cashFlows[value] = event.target.value; findNPV(cashFlows, calcData.r, calcData.initialInvest)}} />  
         </div>
         <div style={lineBreak}/>
       </div>
@@ -328,7 +405,7 @@ function CashFlowContents() {
 }
 function DiscountRateSlider() {
   return(
-    <input type="range" min="0" max="100" step="1" style={sliderStyle} name ="ROR" onChange={(event) => setNpv(findNPV(cashFlows, event.target.value, initialInvest))} />
+    <input type="range" min="0" max="100" step="1" style={sliderStyle} name ="ROR" onChange={(event) => {calcData.r = event.target.value; findNPV(cashFlows, calcData.r, calcData.initialInvest)}} />
   )   
 }
 
@@ -341,42 +418,43 @@ return (
     </div>
 
     <div style={dRateBox}>
-<p style={header1}>DISCOUNT RATE: {r}%</p>{DiscountRateSlider()}
+      <p style={header1}>DISCOUNT RATE: {calcData.r}%</p>{DiscountRateSlider()}
     </div>
 
-    <div style={sketchBox}><p style={header3}>NPV: {theNpv}</p><Sketch/></div>
-    <div style={historyBoxDelete}></div>
+    <div style={sketchBox}><Sketch/></div>
+    <div style={historyBox}><p style={header3}>HISTORY</p>
+      <Graph/>
+      <p style={histTitle}>NPV</p><p style={histTitle2}>RATE</p>
+      <div style={innerHistoryBox}>{loggedNPVs}</div>
+      <div style={snapButtonPos}>{snapNPVBtn()}</div>
+    </div>
   </div>
 )
 
   function findNPV(cashFlows, r, initialInvestValue) {
     //push r value to interface 
-    setr(r);
+   
     //ensures DOM will update even if npv didnt change
     setNpvRan(npvRan + 1);
     
   
-    initialInvest = initialInvestValue;
-    
+    calcData.initialInvest = initialInvestValue;
+    let npvOut = null;
     let rDec = r/100;
     let npv = null;
     //reset modded cash flows
-    modCashFlows = [];
-    modCashFlows.push(initialInvest * -1);
+    calcData.modCashFlows = [];
+    calcData.modCashFlows.push(calcData.initialInvest * -1);
     for (let flow in cashFlows) {
      let powerOf=parseInt(flow) +  1;
      let discountedFlow = cashFlows[flow] / Math.pow(1 + rDec,  powerOf);
-     modCashFlows.push(discountedFlow);
+     calcData.modCashFlows.push(discountedFlow);
      npv += discountedFlow;
     }
-  
-    console.log("r " + r);
-    console.log("cashflows " + cashFlows);
-    console.log("initial Invest " + initialInvest);
-    console.log("npv " + npv);
-    console.log(theNpv);
-    console.log("modflows " + modCashFlows);
-    return ((npv - initialInvest).toFixed(2));
+    npvOut = (npv - calcData.initialInvest);
+    calcData.theNPV = npvOut;
+    
+    //return (npvOut);
   }
   //{cashFlows.map((number) => <li key ={number.toString()}>{number}
 

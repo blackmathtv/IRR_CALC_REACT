@@ -1,6 +1,6 @@
 
 import React from 'react';
-import {modCashFlows} from "./App.js";
+import {calcData} from "./App.js";
 
 function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, strokeWidth, radius) {
     return(
@@ -31,7 +31,8 @@ function GetDrawData () {
         rectangles: {
             bars: [],
             glass: [],
-            betweenGlass: null
+            betweenGlass: null,
+            modFlows: []
         },
         values: {
             drawBoxHeight: 100,
@@ -48,13 +49,13 @@ function GetDrawData () {
         }
     }
     
-    for (var value in modCashFlows) {
-        if (modCashFlows[value] >= 0) {
-            drawData.values.allBarValues.push(modCashFlows[value]);
+    for (var value in calcData.modCashFlows) {
+        if (calcData.modCashFlows[value] >= 0) {
+            drawData.values.allBarValues.push(calcData.modCashFlows[value]);
             
         }
-        else if (modCashFlows[value] < 0) {
-            drawData.values.allBarValues.push(modCashFlows[value] * -1);
+        else if (calcData.modCashFlows[value] < 0) {
+            drawData.values.allBarValues.push(calcData.modCashFlows[value] * -1);
         }
     }
     drawData.values.allBarValues.sort((a,b) => b-a);
@@ -62,13 +63,13 @@ function GetDrawData () {
 
     
     
-    for (var value in modCashFlows) {
-        if (modCashFlows[value] >= 0) {
-            drawData.values.drawBarHeights.push(modCashFlows[value] * drawData.values.viewHeightMultiplier);
+    for (var value in calcData.modCashFlows) {
+        if (calcData.modCashFlows[value] >= 0) {
+            drawData.values.drawBarHeights.push(calcData.modCashFlows[value] * drawData.values.viewHeightMultiplier);
             drawData.points.numPoints.pos +=1;
         }
-        if (modCashFlows[value] < 0) {
-            drawData.values.drawBarHeights.push(modCashFlows[value] * drawData.values.viewHeightMultiplier);
+        if (calcData.modCashFlows[value] < 0) {
+            drawData.values.drawBarHeights.push(calcData.modCashFlows[value] * drawData.values.viewHeightMultiplier);
             drawData.points.numPoints.neg +=1;
         } 
     }

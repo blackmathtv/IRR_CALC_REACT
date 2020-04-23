@@ -3,17 +3,20 @@ import DrawSmooth  from "./bezierInterp.js";
 import GetDrawData from "./drawData.js"
 import { spring } from 'popmotion';
 import { styles } from './App.js'
+import {calcData} from "./App.js";
  
-const canvasHeight = window.innerHeight/2;
-const canvasWidth = canvasHeight * 2;
+
+
 const pathSettle = 50;
 
 let updateData = true;
 let animDrawData = [];
 let drawData = [];
 
+
+
 function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, strokeWidth, radius) {
-  return(
+  return(  
       <rect 
       key={key}
       x={topLeftPoint[0]} y ={topLeftPoint[1]} //array [x,y]
@@ -22,29 +25,35 @@ function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, st
       stroke={strokeColor} //string
       strokeWidth={strokeWidth} 
       rx={radius}
-  />
+    />
+  
   )
 }
 
 function Sketch(){
   console.log("Ran Sketch");  
+  
   const [path, setpath] = React.useState();
-
+ 
   if (updateData){
     drawData = GetDrawData();
+    let numBars = drawData.values.drawBarHeights.length;
+    let  textWidth = ".2vw";
+    if (numBars >= 12) {
+    textWidth = (2/numBars) + "vw";
+    } 
     //push wave points and rectange svg to local drawData
     for (var value in drawData.values.drawBarHeights) {
       let key = value;
       if (drawData.values.drawBarHeights[value] >= 0) {  
-          drawData.rectangles.bars.push(getRectangleSVG(key, [drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value]], drawData.values.barWidth, drawData.values.drawBarHeights[value], styles.barGray));
+          drawData.rectangles.bars.push(getRectangleSVG(key, [drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value]], drawData.values.barWidth, drawData.values.drawBarHeights[value], styles.positiveColor));
           drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [drawData.values.barPosX - drawData.values.glassPad, 2], drawData.values.barWidth + drawData.values.doubleGlassPad, 96, "none", styles.gray, .3, 1));
-          
           //drawData.points.wavePoints.push([drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value]]);
           drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value]]);         
           //drawData.points.negWavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
           drawData.points.negWavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.drawBoxHeight]);
           
-          drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
+         
       }
       else if (drawData.values.drawBarHeights[value] < 0) {
           drawData.rectangles.bars.push(getRectangleSVG(key, [drawData.values.barPosX, drawData.values.barCanvas - (drawData.values.drawBarHeights[value] * -1)], drawData.values.barWidth, (drawData.values.drawBarHeights[value] * -1), styles.negativeColor));
@@ -55,15 +64,27 @@ function Sketch(){
           //  drawData.points.wavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
           drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.drawBoxHeight]);
           
-          drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
+          
           
       }
+ 
+      //drawData.rectangles.modFlows.push(<p style={{position: "absolute", left: modPosX + "%", fontSize: "1vw", background: "blue" }}>3</p>);
+      drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} x={drawData.values.barPosX -1} y="102">{Math.round(calcData.modCashFlows[value])}</text>)
+      drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
     }
+
+    
+    // function getModFlowBox(modValue, leftPad) {
+    //   let boxWidth = 50;
+    //   return (
+    //     <p style= {{position: "absolute", left: leftPad, width: boxWidth, background: "blue"}}>{modValue}</p>
+    //   )
+    // }
   }
   else {
     drawData = animDrawData;
   }
-  
+
   async function runSpring() {    
     for (let point in drawData.points.wavePoints) {
       spring({ from: drawData.points.wavePoints[point][1], to: pathSettle, stiffness: 150, damping: 5 })
@@ -83,7 +104,7 @@ function Sketch(){
         height: "80%"
         }}
         viewBox="0 0 200 100"
-        >{drawData.rectangles.bars}{drawData.rectangles.glass}{path}
+      >{drawData.rectangles.bars}{drawData.rectangles.modFlows}{drawData.rectangles.glass}{path}
       </svg>
       <div>
       {/* <button name="animate" onClick ={ () => {updateData= false; animDrawData = drawData; runSpring()}}>Animate Waves</button>   */}
