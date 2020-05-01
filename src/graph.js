@@ -1,57 +1,57 @@
 import React, { Component } from 'react';
 import './App.css';
 import '../node_modules/react-vis/dist/style.css';
-import {XYPlot, LineSeries, MarkSeries, LabelSeries, VerticalGridLines, XAxis, YAxis} from 'react-vis';
 import {styles} from './App.js';
 import {calcData} from "./App.js";
+import {LineMarkGraph} from './flexgraph.js'
 
 
 
+let graphStyles = {
+  canvasWidth: "36vw",
+  canvasHeight: "15vw",
+  canvasPadLeft: "0",
+  canvasPadTop: "1vw",
+  lineSize: .2,
+  fontSize: 2,
+  fontColor: "#7BA7F0",
+  axisColor: "#7BA7F0",
+  axisLineSize: .2,
+  xTicks: 4,
+  yTicks: 4,
+  tickColor: "#E8E8E8	",
+  tickLineSize: .1,
+  clickPointColor: "#C18FE4",
+  pointSize: 1,
+  selectedPointSize: 2,
+  xName: "DISCOUNT RATE",
+  yName: "NPV",
+  zeroLineColor: "#FFAAAA",
+  zeroLineSize: .3,
+  background: "none",
+}
 
 function Graph()  {
-    let canvasWidth = window.innerWidth;
-    let graphWidth = canvasWidth* .15;
-    let graphHeight = graphWidth;
-    console.log("ran graph");
-    
-    let graphColor = styles.gray;
-    if (calcData.theNPV === 0) {
-        graphColor = styles.irrColor;
-    }
 
-    
-    let fontSize = ".5vw"
-   
-    let data = calcData.npvSnap;
+  console.log(calcData.npvSnap);
+  let calcInput = [[0,0]];
+  if (calcData.npvSnap != 0) {
+    calcInput = calcData.npvSnap
+  }
 
-  
+
+  let data = {
+    "#47C4C1": calcInput
+  };
+
+
+// let styles = [];
+let graph = LineMarkGraph(data, graphStyles);
     
-    // const data = [
-    //   {x: 0, y: 8, label: '200', style: {fontSize: fontSize} },
-    //   {x: 1, y: -5, label: 'woah'},
-    //   {x: 2, y: 4, label: 'woah'},
-    //   {x: 3, y: 9},
-    //   {x: 4, y: 1},
-    //   {x: 5, y: 7},
-    //   {x: 6, y: 6},
-    //   {x: 7, y: 3},
-    //   {x: 8, y: 2},
-    //   {x: 9, y: 0, label: 'woah'}
-    // ];
+//<FlexibleXYPlot margin={{left: 0, right: 0, top: 0, bottom: 0}}>    
     return (
       <div>
-        <div style={{position: "absolute", background: "none", top: "10%"}}className="Graph">
-            <XYPlot style={{position: "absolute"}}height={graphHeight} width={graphWidth}>    
-        
-            
-            <YAxis title="NPV" />
-            <XAxis title="Discount Rate" />
-            {/* <LabelSeries color={graphColor} data={data}  /> */}
-            <MarkSeries color={graphColor} data={data}  />
-            <LineSeries color={graphColor} data={[{x: 0, y:0}, {x: 100, y: 0}]} />
-            </XYPlot>
-        </div>
-        
+       {graph}
       </div>
     );
   

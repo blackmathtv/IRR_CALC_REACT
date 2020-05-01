@@ -2,26 +2,32 @@ import React from 'react';
 import Sketch from './sketch'
 import './App.css';
 import Graph from './graph.js';
+import findIRR from './irr.js';
 import GetDrawData from "./drawData.js";
 import Button from '@material-ui/core/Button';
 export var modCashFlows = [];
 
 
 
-let cashFlows = [0];
+
 
 
 let canvasWidth = window.innerWidth * .9;
 let canvasHeight = canvasWidth/2.32;
 let loggedNPVs = [];
 
+
 export let calcData = {
   initialInvest: 0,
+  cashFlows: [0],
   modCashFlows: [],
   theNPV: [],
   npvSnap: [],
   snapGraphX: 0,
-  r: 50
+  r: 50,
+  testVar: 0,
+  irr: null,
+  discountFactor: .67
 };
 export let styles = {
   canvasWidth: canvasWidth,
@@ -36,87 +42,51 @@ export let styles = {
   darkGray: "#3A3A3A",
   gray: "#ACACAC",
   irrColor: "#53DD6C",
-  npvBtnColor: "#57A773"
- 
-
+  npvBtnColor: "#57A773",
+  boxRadius: ".5vw",
+  calcPadLeft: "8%",
+  calcPadTop: "10%",
+  bottomRowPadTop: "59%",
+  firstRowHeight: "44.5%",
+  secondRowHeight: "34%"
 }
 
-
+function rndNearTenth(num) {
+  return (Math.round(num * 100) / 100).toFixed(2);
+}
 
 
 const calcCanvas = {
   position: "absolute",
-  left: "5%",
-  top: "10%",
+  left: "13%",
+  top: "0%",
   
   background: styles.canvasColor,
-  height: "40vw",
-  width: "90vw",
+  height: "50vw",
+  width: "74vw",
 }
+
+const calcTitle = {
+  position: "absolute",
+  fontWeight: "bold",
+  fontSize: "1.4vw",
+  left: styles.calcPadLeft,
+  top: parseInt(styles.calcPadTop) -8 + "%",
+}
+//..........CASHBOX......//
+
 const cashFlowBox = {
   position: "absolute",
-  top: "14%",
-  left: "5%", 
+  top: styles.calcPadTop,
+  left: styles.calcPadLeft, 
   background: styles.lightCanvasColor,
-  height: "56%",
-  width: "17%",
-  borderRadius: "1vw"
+  height: "30%",
+  width: "18%",
+  borderRadius: ".5vw"
 }
-
-const dRateBox = {
-  position: "absolute",
-  bottom: "9%",
-  left: "5%", 
-  background: styles.lightCanvasColor,
-  height: "17%",
-  width: "17%",
-  borderRadius: "1vw"
-}
-
-const sketchBox = {
-  position: "absolute",
-  bottom: "9%",
-  left: "24%", 
-  background: styles.lightCanvasColor,
-  height: "77%",
-  width: "52%",
-  borderRadius: "1vw"
-}
-
-const historyBox = {
-  position: "absolute",
-  bottom: "9%",
-  right: "5%", 
-  background: styles.lightCanvasColor,
-  height: "77%",
-  width: "17%",
-  borderRadius: "1vw" 
-}
-
-const innerHistoryBox = {
-  position: "absolute",
-  top: "65%", 
-  background: styles.innerCashBoxColor,
-  height: "15%",
-  width: "100%",
-  overflowY: "scroll",
-  overflowX: "auto"
-  //fontWeight: "800"
-}
-
-const historyBoxDelete = {
-  position: "absolute",
-  bottom: "0%",
-  right: "0%", 
-  background: styles.lightCanvasColor,
-  height: "100%",
-  width: "19%",
-  borderRadius: 0
-}
-
 const innerCashBox = {
   position: "absolute",
-  top: "12%", 
+  top: "13%", 
   background: styles.innerCashBoxColor,
   height: "76%",
   width: "100%",
@@ -137,12 +107,61 @@ const negCashContents = {
   height:"2.6vw",
   color: styles.negativeColor
 }
+const cashInputStyle = {
+  position: "absolute",
+  background: "none",
+  width: "57%",
+  height: "22%",
+  left: "27%",
+  fontSize: "1.8vw",
+  border: "none",
+  color: styles.positiveColor
+}
 
-const initalInvStyle = { 
-  fontSize: "2vw",
-  width: "auto",
-  height:"2.6vw",
-  marginLeft: "15%"
+const negCashInputStyle = {
+  position: "absolute",
+  background: "none",
+  width: "57%",
+  height: "22%",
+  left: "27%",
+  fontSize: "1.8vw",
+  border: "none",
+  color: styles.negativeColor
+}
+const cashBottom= {
+  position: "absolute",
+  top: "88%",
+  left: "0%",
+  width: "100%",
+  height: "12%",
+  background: "none",
+  fontWeight: "500",
+  fontSize: ".9vw",
+  color: styles.darkGray
+}
+const plusButtonStyle = {
+ 
+  fill: styles.innerCashBoxColor,
+  color: styles.darkGray,
+  stroke: styles.darkGray,
+  strokeWidth: "5%"
+}
+const plusLineStyle = {
+  stroke: styles.darkGray,
+  strokeWidth: "5%"
+}
+const plusBtnContainer= {
+  position: "absolute",
+  paddingLeft: "70%",
+  paddingTop: "3%"
+}
+const cashBtmTxt = {
+  position: "absolute",
+  top: "87%",
+  left: "29%",
+  fontSize: ".7vw",
+  fontWeight: "medium"
+ 
 }
 const negInitialInvStyle = { 
   fontSize: "2vw",
@@ -173,85 +192,117 @@ const minusLineStyle = {
   strokeWidth: "8%"
 }
 
+//.....DISCOUNT RATE BOX.........
+
+const dRateBox = {
+  position: "absolute",
+  top: parseInt(styles.calcPadTop) + 32.5 + "%",
+  left: styles.calcPadLeft, 
+  background: styles.lightCanvasColor,
+  height: "12%",
+  width: cashFlowBox.width,
+  borderRadius: styles.boxRadius
+}
+const sliderStyle = {
+  position: "absolute",
+  top: "60%",
+  left: "11%",
+  background: "styles.canvasColor",
+  cursor: "pointer",
+  width: "75%"
+}
+const DRateText = {
+  position: "absolute",
+  fontWeight: "bold",
+  fontSize: ".8vw",
+  left: "13%"
+}
+const DFactorText = {
+  position: "absolute",
+  fontWeight: "bold",
+  fontSize: ".8vw",
+  left: "13%",
+  top: "20%"
+}
+//.......SKETCHBOX...........
+const sketchBox = {
+  position: "absolute",
+  top: styles.calcPadTop,
+  left: "29%", 
+  background: styles.lightCanvasColor,
+  height: styles.firstRowHeight,
+  width: "41%",
+  borderRadius: styles.boxRadius
+}
+
+//.....HistoryBOX.....
+
+const historyBox = {
+  position: "absolute",
+  top: styles.calcPadTop,
+  left: "73%", 
+  background: styles.lightCanvasColor,
+  height: styles.firstRowHeight,
+  width: "18.5%",
+  borderRadius: styles.boxRadius
+}
+
+const innerHistoryBox = {
+  position: "absolute",
+  top: "65%", 
+  background: styles.innerCashBoxColor,
+  height: "15%",
+  width: "100%",
+  overflowY: "scroll",
+  overflowX: "auto"
+  //fontWeight: "800"
+}
+const histListContents = { 
+  paddingTop: 0,
+  width: "100%",
+  height:"30%",
+  color: styles.negativeColor
+}
+
+//......GRAPH BOX.......
+
+const graphBox = {
+  position: "absolute",
+  top: styles.bottomRowPadTop,
+  left: "44%", 
+  background: styles.lightCanvasColor,
+  height: styles.secondRowHeight,
+  width: "47.5%",
+  borderRadius: styles.boxRadius
+}
+
+const InstructionBox = {
+  position: "absolute",
+  top: styles.bottomRowPadTop,
+  left: styles.calcPadLeft, 
+  background: '#FAEFC5',
+  height: styles.secondRowHeight,
+  width: "32.5%",
+  borderRadius: styles.boxRadius
+}
+
+
 const header1 = {
   fontWeight: "bold",
-  fontSize: "1vw",
+  fontSize: ".8vw",
   textAlign: "center"
 }
+
+
 const header3 = {
   fontWeight: "bold",
   fontSize: "1.2vw",
   textAlign: "center"
 }
-const header2 = {
-  position: "absolute",
-  fontWeight: "bold",
-  fontSize: "2vw",
-  left: "5%"
-  
-}
-const cashInputStyle = {
-  position: "absolute",
-  background: "none",
-  width: "57%",
-  height: "14%",
-  left: "27%",
-  fontSize: "2vw",
-  border: "none",
-  color: styles.positiveColor
-}
 
-const negCashInputStyle = {
-  position: "absolute",
-  background: "none",
-  width: "57%",
-  height: "14%",
-  left: "25%",
-  fontSize: "2vw",
-  border: "none",
-  color: styles.negativeColor
-}
-const cashBottom= {
-  position: "absolute",
-  top: "88%",
-  left: "0%",
-  width: "100%",
-  height: "12%",
-  background: "none",
-  fontWeight: "500",
-  fontSize: ".9vw",
-  color: styles.darkGray
-}
-const plusButtonStyle = {
- 
-  fill: styles.innerCashBoxColor,
-  color: styles.darkGray,
-  stroke: styles.darkGray,
-  strokeWidth: "5%"
-}
-const plusLineStyle = {
-  stroke: styles.darkGray,
-  strokeWidth: "5%"
-}
-const plusBtnContainer= {
-  position: "absolute",
-  paddingLeft: "70%",
-  paddingTop: "4%"
-}
-const cashBtmTxt = {
-  position: "absolute",
-  left: "28%",
- 
-}
 
-const sliderStyle = {
-  position: "absolute",
-  top: "40%",
-  left: "18%",
-  background: "styles.canvasColor",
-  cursor: "pointer",
-  width: "60%"
-}
+
+
 
 
 
@@ -273,44 +324,34 @@ const histTitle2 = {
   bottom: "33%",
   right: "16%",
 }
-
-
-
-function App() {
-
-
-
-//hook that makes sure dom is rerendered if a button is clicked, even if theNpv hasn't changed
-const [npvRan, setNpvRan] = React.useState(0);
-
-let zeroCashInputStyle = {
-  position: "absolute",
-  background: "none",
-  width: "80%",
-  height: "14%",
-  fontSize: ".8vw",
-  border: "none",
-  color: styles.negativeColor
+const instructionTitle = {
+  fontSize: "1.1vw",
+  fontFamily: 'Montserrat',
+  textAlign: "center",
+  fontWeight: "bold"
 }
-function minusButton(value) {
+const instructTextStyle = {
+  fontSize: ".6vw",
+  fontFamily: 'Montserrat',
+  paddingLeft: "5%",
+  paddingRight: "5%",
+  fontWeight: "regular"
+}
+const instructTextCenter = {
+  fontSize: ".7vw",
+  paddingLeft: "5%",
+  paddingRight: "5%",
+  textAlign: "center",
+  fontWeight: "bold"
+}
+function instructionText() {
   return(
-      <svg height="1.2vw" width="2vw" onClick= {() => {cashFlows.splice(value,1); findNPV(cashFlows, calcData.r, calcData.initialInvest)} } >
-  
-        <circle style={minusButtonStyle} cx="56%" cy="50%" r="32%"/>
-        <line style={minusLineStyle} x1="44%" y1="50%" x2="67%" y2="50%"/>    
-      </svg>
+    <div>
+      <p style={instructionTitle}>INSTRUCTIONS</p>
+      <p style = {instructTextStyle}>1. Enter as many cash flow periods as you'd like. The # inside the dollar sign represents the # of periods in the future where: </p>
+     <p style = {instructTextCenter}>{dollSymbol(0, "black")} = dollars in Period 0 (present day) </p>
+    </div>
   )
-}
-
- 
-function cashFlowPlusBtn() {
-  return(
-    <svg height="1.7vw" width="1.7vw" style={plusBtnContainer} onClick= {() => {if (calcData.initialInvest != ""){ cashFlows.push(0); findNPV(cashFlows, calcData.r, calcData.initialInvest)}} } >   
-      <circle style={plusButtonStyle} cx="50%" cy="50%" r="38%"/>
-      <line style={plusLineStyle} x1="30%" y1="50%" x2="70%" y2="50%"/>    
-      <line style={plusLineStyle} x1="50%" y1="70%" x2="50%" y2="30%"/> 
-    </svg>
-  ) 
 }
 
 function dollSymbol(value, color) {
@@ -324,29 +365,124 @@ function dollSymbol(value, color) {
   }
  
   return(
+    
     <svg style={{position: "absolute", background: "none"}} height="2.6vw" width="1.5vw" >
-      <text style={{fontSize: "2.2vw", fontWeight: "400", fill: color}} x="4%" y="80%">$</text>
+      <text style={{fontSize: "2vw", fontWeight: "400", fill: color}} x="8%" y="75%">$</text>
       <circle style={{fill: color}} cx="52%" cy="78%" r="18%"/>
       <text style={{fontSize: numSize + "vw", fontWeight: "700", fill: styles.innerCashBoxColor}} x={numX} y={numY}>{value}</text>
     </svg>
+    
   ) 
 }
+
+function App() {
+
+
+
+//hook that makes sure dom is rerendered if a button is clicked, even if theNpv hasn't changed
+const [npvRan, setNpvRan] = React.useState(0);
+calcData.testVar = npvRan;
+//console.log( "irr " + findIRR([100], 100));
+let zeroCashInputStyle = {
+  
+  position: "absolute",
+  background: "none",
+  width: "80%",
+  height: "22%",
+  fontSize: ".8vw",
+  border: "none",
+  color: styles.negativeColor
+}
+function handleCashFlowChange() {
+  findNPV(calcData.cashFlows, calcData.r, calcData.initialInvest);
+  calcData.npvSnap = [];      
+  loggedNPVs = [];
+}
+function minusButton(value) {
+  return(
+      <svg height="1.2vw" width="2vw" onClick= {() => {calcData.cashFlows.splice(value,1); handleCashFlowChange()} } >
+  
+        <circle style={minusButtonStyle} cx="56%" cy="50%" r="32%"/>
+        <line style={minusLineStyle} x1="44%" y1="50%" x2="67%" y2="50%"/>    
+      </svg>
+  )
+}
+
+function autoButton() {
+  return (
+    <div>
+      <button onClick= {() => {calcData.irr = Math.round((findIRR(calcData.cashFlows, calcData.initialInvest)[0]) * 100) / 100; setNpvRan(npvRan + 1) }}>AUTO IRR</button>
+      <p>irr:{calcData.irr}</p>
+    </div>
+    )
+}
+ 
+function cashFlowPlusBtn() {
+  return(
+    <svg height="1.3vw" width="1.3vw" style={plusBtnContainer} onClick= {() => {if (calcData.initialInvest != ""){ calcData.cashFlows.push(0); handleCashFlowChange()}} } >   
+      <circle style={plusButtonStyle} cx="50%" cy="50%" r="38%"/>
+      <line style={plusLineStyle} x1="30%" y1="50%" x2="70%" y2="50%"/>    
+      <line style={plusLineStyle} x1="50%" y1="70%" x2="50%" y2="30%"/> 
+    </svg>
+  ) 
+}
+
+
+// function dollSymbol(value, color) {
+//   let numSize = .6; 
+//   let numX = "39%";
+//   let numY = "86%";
+//   if (value > 9) {
+//     numSize= .5;
+//     numX = "31%"
+//     numY = "85%"
+//   }
+ 
+//   return(
+    
+//     <svg style={{position: "absolute", background: "none"}} height="2.6vw" width="1.5vw" >
+//       <text style={{fontSize: "2.2vw", fontWeight: "400", fill: color}} x="4%" y="80%">$</text>
+//       <circle style={{fill: color}} cx="52%" cy="78%" r="18%"/>
+//       <text style={{fontSize: numSize + "vw", fontWeight: "700", fill: styles.innerCashBoxColor}} x={numX} y={numY}>{value}</text>
+//     </svg>
+    
+//   ) 
+// }
 function snapNPVBtn() {
-  return (<Button style={{position: "absolute", width: "10vw", fontSize: "1.5vw", color: styles.darkGray, fontFamily: 'Fira Code',  border: "1px solid", padding: ".2vw"}} variant="outlined"  onClick ={ () => {calcData.npvSnap.unshift({x: calcData.r, y: calcData.theNPV }); logNPV(); setNpvRan(npvRan + 1); }} disableElevation >FIND NPV</Button>)
+  return (<Button style={{position: "absolute", width: "10vw", fontSize: "1.5vw", color: styles.darkGray, fontFamily: 'Fira Code',  border: "1px solid", padding: ".2vw"}} variant="outlined"  onClick ={ () => {handleNPVSnap()}} disableElevation >FIND NPV</Button>)
   //return (<button style={snapNPVBtnStyle} name="npvsnap" onClick ={ () => {calcData.npvSnap.push({x: calcData.r, y: calcData.theNPV }); calcData.snapGraphX++; setNpvRan(npvRan + 1); }}>FIND NPV</button>  )
+}
+function handleNPVSnap() {
+  if (calcData.initialInvest != "") {
+    calcData.npvSnap.unshift([calcData.r, calcData.theNPV]); 
+    logNPV(); 
+    setNpvRan(npvRan + 1); 
+  }
 }
 
 function logNPV() {
  
   loggedNPVs.unshift(
-    <div style={{ paddingLeft:"6%"}}>
-      <p style={{ }}>{calcData.theNPV.toFixed(2)}{"_____________"}{calcData.r}%</p><p style = {{float: "right", display: "inline"}}></p>
+    <div style = {histListContents}>
+      <svg style={{ position: "absolute", background: "none"}} height="30%" width="100%">
+        <text style={{ fontSize: "1.2vw" }} x="0" y="70%">{calcData.theNPV.toFixed(2)}</text>
+        <text style={{ fontSize: "1.2vw" }} x="75%" y="70%">{calcData.r}%</text>
+      </svg>
     </div>
-  )
+    )
+ 
+  // loggedNPVs.unshift(
+  //   <div style={{ }}>
+  //     <p style={{ fontSize: "1vw", float: "left", display: "inline" }}>{calcData.theNPV.toFixed(2)}</p><p style = {{fontSize: "1vw", float: "right", display: "inline"}}>{calcData.r}%</p>
+  //     <br/>
+  //   </div>
+  // )
 }
+
 
 function CashFlowContents() {
   let dollColor = styles.negativeColor;
+ 
 
   if (calcData.initialInvest === "") {
     zeroCashInputStyle.fontSize = ".8vw";
@@ -366,7 +502,7 @@ function CashFlowContents() {
         <div>
           <div style={{position: "absolute", left: "2%", bottom: "100%"}}>{dollSymbol(0, dollColor)}</div>
           <div style={negInitialInvStyle}>        
-            <input style={zeroCashInputStyle} placeholder="<Enter Initial Investment Here>"  key={"inINVhold"}  type="text" name ={"initialInv"} onChange={(event) => {calcData.initialInvest = event.target.value; findNPV(cashFlows, calcData.r, calcData.initialInvest)}} />  
+            <input style={zeroCashInputStyle} placeholder="<Enter Initial Investment Here>"  key={"inINVhold"}  type="text" name ={"initialInv"} onChange={(event) => {calcData.initialInvest = event.target.value; handleCashFlowChange()}} />  
           </div>
           <div style={lineBreak}/>
         </div>
@@ -374,14 +510,14 @@ function CashFlowContents() {
 
   
 
-  for (let value in cashFlows) {
-    if (cashFlows[value] < 0){
+  for (let value in calcData.cashFlows) {
+    if (calcData.cashFlows[value] < 0){
       contents.push(
         <div>
           <div style={negCashContents}>
             {minusButton(value)} 
             {dollSymbol(parseInt(value) + 1, styles.negativeColor)}  
-            <input style={negCashInputStyle} key={"cashflow" + value} value={cashFlows[value]} type="text" name ={value + "cashFlow"} onChange={(event) => {cashFlows[value] = event.target.value; findNPV(cashFlows, calcData.r, calcData.initialInvest)}} />  
+            <input style={negCashInputStyle} key={"cashflow" + value} value={calcData.cashFlows[value]} type="text" name ={value + "cashFlow"} onChange={(event) => {calcData.cashFlows[value] = event.target.value; handleCashFlowChange()}} />  
           </div>
           <div style={lineBreak}/>
         </div>
@@ -394,40 +530,48 @@ function CashFlowContents() {
         <div style={cashContents} >
           {minusButton(value)} 
           {dollSymbol(parseInt(value) + 1, styles.positiveColor)}   
-          <input style={cashInputStyle} key={"cashflow" + value} value={cashFlows[value]} type="text" name ={value + "cashFlow"} onChange={(event) => {cashFlows[value] = event.target.value; findNPV(cashFlows, calcData.r, calcData.initialInvest)}} />  
+          <input style={cashInputStyle} key={"cashflow" + value} value={calcData.cashFlows[value]} type="text" name ={value + "cashFlow"} onChange={(event) => {calcData.cashFlows[value] = event.target.value; handleCashFlowChange()}} />  
         </div>
         <div style={lineBreak}/>
       </div>
       )
     }
   }
+ 
   return (contents)
 }
 function DiscountRateSlider() {
   return(
-    <input type="range" min="0" max="100" step="1" style={sliderStyle} name ="ROR" onChange={(event) => {calcData.r = event.target.value; findNPV(cashFlows, calcData.r, calcData.initialInvest)}} />
+    <input type="range" min="0" max="100" step="1"  style={sliderStyle} name ="ROR" onChange={(event) => {calcData.r = event.target.value; calcData.discountFactor = rndNearTenth(1/ (1 + (calcData.r/100))); findNPV(calcData.cashFlows, calcData.r, calcData.initialInvest)}} />
   )   
 }
 
 return (
   <div style={calcCanvas}>
-    <p style={header2}>NET PRESENT VALUE CALCULATOR</p>
+    <p style={calcTitle}>NET PRESENT VALUE CALCULATOR</p>
     <div style={cashFlowBox}><p style={header1}>CASH FLOWS</p>
       <div style={innerCashBox}>{CashFlowContents()}</div>
-      <div style={cashBottom}>{cashFlowPlusBtn()}<p style={cashBtmTxt}>Add another</p></div>
+      <div style={cashBottom}>{cashFlowPlusBtn()}</div>
+      <p style={cashBtmTxt}>Add another</p>
     </div>
 
     <div style={dRateBox}>
-      <p style={header1}>DISCOUNT RATE: {calcData.r}%</p>{DiscountRateSlider()}
+      <p style={DRateText}>DISCOUNT RATE: {calcData.r}%</p>
+      
+      <p style={DFactorText}>DISCOUNT FACTOR: {calcData.discountFactor}</p>
+      {DiscountRateSlider()}
     </div>
 
     <div style={sketchBox}><Sketch/></div>
-    <div style={historyBox}><p style={header3}>HISTORY</p>
-      <Graph/>
+    <div style={historyBox}><p style={header3}>HISTORY</p>  
       <p style={histTitle}>NPV</p><p style={histTitle2}>RATE</p>
       <div style={innerHistoryBox}>{loggedNPVs}</div>
       <div style={snapButtonPos}>{snapNPVBtn()}</div>
     </div>
+
+    <div style ={graphBox}><Graph/></div>
+
+    <div style ={InstructionBox}>{instructionText()}</div>
   </div>
 )
 
@@ -451,12 +595,13 @@ return (
      calcData.modCashFlows.push(discountedFlow);
      npv += discountedFlow;
     }
-    npvOut = (npv - calcData.initialInvest);
+   
+    npvOut =  Math.round((npv - calcData.initialInvest) * 100) / 100;
     calcData.theNPV = npvOut;
     
     //return (npvOut);
   }
-  //{cashFlows.map((number) => <li key ={number.toString()}>{number}
+  //{calcData.cashFlows.map((number) => <li key ={number.toString()}>{number}
 
 
 

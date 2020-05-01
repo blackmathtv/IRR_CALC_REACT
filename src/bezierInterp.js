@@ -56,6 +56,8 @@ function DrawSmooth (points, pos) {
         const [cpeX, cpeY] = controlPoint(point, a[i - 1], a[i + 1], true)
         return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${point[0]},${point[1]}`
     }
+
+    
     return (svgPath(points, bezierCommand));
 }
 
