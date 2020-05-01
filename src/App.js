@@ -582,6 +582,7 @@ function DiscountRateSlider() {
 
 return (
   <div style={calcCanvas}>
+    <div style={arrow1Style}>{arrow()}</div>
     <p style={calcTitle}>NET PRESENT VALUE CALCULATOR</p>
     <div style={cashFlowBox}><p style={header1}>CASH FLOWS</p>
       <div style={innerCashBox}>{CashFlowContents()}</div>
@@ -613,7 +614,7 @@ return (
 
     <div style ={InstructionBox}>{instructionText()}</div>
 
-    <div style={arrow1Style}>{arrow()}</div>
+    
     
   </div>
 )
