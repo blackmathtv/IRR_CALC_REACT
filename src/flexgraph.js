@@ -423,6 +423,7 @@ export function GraphPoints(key, sortedData, styles) {
 
     const [selectedPoint, setSelectedPoint] = React.useState([]);
     const [hovered, setHovered] = React.useState([]);
+   
 
     function handlePointClick(set, pair) {
 

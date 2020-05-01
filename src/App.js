@@ -23,7 +23,7 @@ export let calcData = {
   cashFlows: [0],
   modCashFlows: [],
   theNPV: 0,
-  npvSnap: [],
+  npvSnap: [[0,0]],
   snapGraphX: 0,
   r: 50,
   testVar: 0,
@@ -435,7 +435,7 @@ let zeroCashInputStyle = {
 }
 function handleCashFlowChange() {
   findNPV(calcData.cashFlows, calcData.r, calcData.initialInvest);
-  calcData.npvSnap = [];      
+  calcData.npvSnap = [[0,0]];      
   loggedNPVs = [];
 }
 function minusButton(value) {
