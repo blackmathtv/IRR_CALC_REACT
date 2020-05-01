@@ -5,6 +5,7 @@ import Graph from './graph.js';
 import findIRR from './irr.js';
 import GetDrawData from "./drawData.js";
 import Button from '@material-ui/core/Button';
+import {getPathSVG} from "./flexgraph.js";
 export var modCashFlows = [];
 
 
@@ -21,7 +22,7 @@ export let calcData = {
   initialInvest: 0,
   cashFlows: [0],
   modCashFlows: [],
-  theNPV: [],
+  theNPV: 0,
   npvSnap: [],
   snapGraphX: 0,
   r: 50,
@@ -40,7 +41,7 @@ export let styles = {
   negativeColor: "#F50057",
   positiveColor: "#27293E",
   darkGray: "#3A3A3A",
-  gray: "#ACACAC",
+  gray: "#8C8E8E",
   irrColor: "#53DD6C",
   npvBtnColor: "#57A773",
   boxRadius: ".5vw",
@@ -235,9 +236,9 @@ const sketchBox = {
   borderRadius: styles.boxRadius
 }
 
-//.....HistoryBOX.....
+//.....NpvStatBOX.....
 
-const historyBox = {
+const NpvStatBox = {
   position: "absolute",
   top: styles.calcPadTop,
   left: "73%", 
@@ -247,22 +248,36 @@ const historyBox = {
   borderRadius: styles.boxRadius
 }
 
-const innerHistoryBox = {
-  position: "absolute",
-  top: "65%", 
-  background: styles.innerCashBoxColor,
-  height: "15%",
-  width: "100%",
-  overflowY: "scroll",
-  overflowX: "auto"
-  //fontWeight: "800"
+// const innerNpvStatBox = {
+//   position: "absolute",
+//   top: "65%", 
+//   background: styles.innerCashBoxColor,
+//   height: "15%",
+//   width: "100%",
+//   overflowY: "scroll",
+//   overflowX: "auto"
+//   //fontWeight: "800"
+// }
+
+
+const NPVHeader = {
+
+  position: "relative",
+  fontWeight: "medium",
+  fontSize: "1.8vw",
+  top: 0,
+  color: styles.gray,
+  textAlign: "center",
+  marginTop: 0
+  
+
 }
-const histListContents = { 
-  paddingTop: 0,
-  width: "100%",
-  height:"30%",
-  color: styles.negativeColor
-}
+// const histListContents = { 
+//   paddingTop: 0,
+//   width: "100%",
+//   height:"30%",
+//   color: styles.negativeColor
+// }
 
 //......GRAPH BOX.......
 
@@ -301,8 +316,22 @@ const header3 = {
 }
 
 
+const arrow1Style = {
+  position: "relative",
+  paddingLeft: "27%",
+  paddingTop: "20%"
+}
+const arrow2Style = {
+  position: "relative",
+  paddingLeft: "27%",
+  paddingTop: "0%"
+}
 
-
+const arrow3Style = {
+  position: "relative",
+  paddingLeft: "27%",
+  paddingTop: "20%"
+}
 
 
 
@@ -374,6 +403,17 @@ function dollSymbol(value, color) {
     
   ) 
 }
+
+function arrow() {
+  let path = getPathSVG("drawArrow", [[0,0], [0,6], [1.5,3]], "none", 0, 0, 0, "black")
+  let path2 = getPathSVG("drawArrow", [[60,0], [60,6], [61.5,3]], "none", 0, 0, 0, "black")
+  let path3 = getPathSVG("drawArrow", [[74,49], [77.5,49], [75.75,52]], "none", 0, 0, 0, "black")
+  let viewBox = "0 0 100 100";
+  return ( <svg viewBox = {viewBox} >{path}{path2}{path3}</svg>)
+  
+};
+
+
 
 function App() {
 
@@ -449,35 +489,27 @@ function cashFlowPlusBtn() {
 //   ) 
 // }
 function snapNPVBtn() {
-  return (<Button style={{position: "absolute", width: "10vw", fontSize: "1.5vw", color: styles.darkGray, fontFamily: 'Fira Code',  border: "1px solid", padding: ".2vw"}} variant="outlined"  onClick ={ () => {handleNPVSnap()}} disableElevation >FIND NPV</Button>)
+  return (<Button style={{position: "absolute", width: "10vw", fontSize: "1vw", background: styles.gray, color: styles.lightCanvasColor, fontFamily: 'Fira Code', padding: 0, left: "-.4vw", width: "10vw", height: "2vw"}} variant="contained"  onClick ={ () => {handleNPVSnap()}}  >PLOT ON GRAPH</Button>)
   //return (<button style={snapNPVBtnStyle} name="npvsnap" onClick ={ () => {calcData.npvSnap.push({x: calcData.r, y: calcData.theNPV }); calcData.snapGraphX++; setNpvRan(npvRan + 1); }}>FIND NPV</button>  )
 }
 function handleNPVSnap() {
   if (calcData.initialInvest != "") {
     calcData.npvSnap.unshift([calcData.r, calcData.theNPV]); 
-    logNPV(); 
     setNpvRan(npvRan + 1); 
   }
 }
 
-function logNPV() {
+// function logNPV() {
  
-  loggedNPVs.unshift(
-    <div style = {histListContents}>
-      <svg style={{ position: "absolute", background: "none"}} height="30%" width="100%">
-        <text style={{ fontSize: "1.2vw" }} x="0" y="70%">{calcData.theNPV.toFixed(2)}</text>
-        <text style={{ fontSize: "1.2vw" }} x="75%" y="70%">{calcData.r}%</text>
-      </svg>
-    </div>
-    )
- 
-  // loggedNPVs.unshift(
-  //   <div style={{ }}>
-  //     <p style={{ fontSize: "1vw", float: "left", display: "inline" }}>{calcData.theNPV.toFixed(2)}</p><p style = {{fontSize: "1vw", float: "right", display: "inline"}}>{calcData.r}%</p>
-  //     <br/>
-  //   </div>
-  // )
-}
+//   loggedNPVs.unshift(
+//     <div style = {histListContents}>
+//       <svg style={{ position: "absolute", background: "none"}} height="30%" width="100%">
+//         <text style={{ fontSize: "1.2vw" }} x="0" y="70%">{calcData.theNPV.toFixed(2)}</text>
+//         <text style={{ fontSize: "1.2vw" }} x="75%" y="70%">{calcData.r}%</text>
+//       </svg>
+//     </div>
+//     )
+// }
 
 
 function CashFlowContents() {
@@ -546,6 +578,8 @@ function DiscountRateSlider() {
   )   
 }
 
+
+
 return (
   <div style={calcCanvas}>
     <p style={calcTitle}>NET PRESENT VALUE CALCULATOR</p>
@@ -562,16 +596,25 @@ return (
       {DiscountRateSlider()}
     </div>
 
-    <div style={sketchBox}><Sketch/></div>
-    <div style={historyBox}><p style={header3}>HISTORY</p>  
-      <p style={histTitle}>NPV</p><p style={histTitle2}>RATE</p>
-      <div style={innerHistoryBox}>{loggedNPVs}</div>
+    <div style={sketchBox}>
+      <p style={header1}>ADJUSTED CASH FLOWS</p>
+      <Sketch/>
+    </div>
+    
+    <div style={NpvStatBox}><p style={header1}>NET PRESENT VALUE</p>  
+      <p style={NPVHeader}>{calcData.theNPV}</p>     
       <div style={snapButtonPos}>{snapNPVBtn()}</div>
     </div>
 
-    <div style ={graphBox}><Graph/></div>
+    <div style ={graphBox}>
+      <p style={header1}>DISCOUNT RATE V. NPV</p> 
+      <Graph/>
+    </div>
 
     <div style ={InstructionBox}>{instructionText()}</div>
+
+    <div style={arrow1Style}>{arrow()}</div>
+    
   </div>
 )
 
@@ -597,7 +640,7 @@ return (
     }
    
     npvOut =  Math.round((npv - calcData.initialInvest) * 100) / 100;
-    calcData.theNPV = npvOut;
+    calcData.theNPV = npvOut.toFixed(2);
     
     //return (npvOut);
   }

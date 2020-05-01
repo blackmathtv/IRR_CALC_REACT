@@ -7,31 +7,32 @@ import {LineMarkGraph} from './flexgraph.js'
 
 
 
-let graphStyles = {
-  canvasWidth: "36vw",
-  canvasHeight: "15vw",
-  canvasPadLeft: "0",
-  canvasPadTop: "1vw",
-  lineSize: .2,
-  fontSize: 2,
-  fontColor: "#7BA7F0",
-  axisColor: "#7BA7F0",
-  axisLineSize: .2,
-  xTicks: 4,
-  yTicks: 4,
-  tickColor: "#E8E8E8	",
-  tickLineSize: .1,
-  clickPointColor: "#C18FE4",
-  pointSize: 1,
-  selectedPointSize: 2,
-  xName: "DISCOUNT RATE",
-  yName: "NPV",
-  zeroLineColor: "#FFAAAA",
-  zeroLineSize: .3,
-  background: "none",
-}
+
 
 function Graph()  {
+  let graphStyles = {
+    canvasWidth: "36vw",
+    canvasHeight: "15vw",
+    canvasPadLeft: "0",
+    canvasPadTop: "1vw",
+    lineSize: .2,
+    fontSize: 2,
+    fontColor: styles.gray,
+    axisColor: styles.canvasColor,
+    axisLineSize: .3,
+    xTicks: 4,
+    yTicks: 4,
+    tickColor: "#E8E8E8	",
+    tickLineSize: .1,
+    clickPointColor: "#C18FE4",
+    pointSize: 1,
+    selectedPointSize: 2,
+    xName: "DISCOUNT RATE",
+    yName: "NPV",
+    zeroLineColor: "#FFAAAA",
+    zeroLineSize: .3,
+    background: "none",
+  }
 
   console.log(calcData.npvSnap);
   let calcInput = [[0,0]];

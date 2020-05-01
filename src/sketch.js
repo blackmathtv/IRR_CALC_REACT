@@ -38,8 +38,8 @@ function Sketch(){
   if (updateData){
     drawData = GetDrawData();
     let numBars = drawData.values.drawBarHeights.length;
-    let  textWidth = ".2vw";
-    if (numBars >= 12) {
+    let  textWidth = ".5vw";
+    if (numBars >= 4) {
     textWidth = (2/numBars) + "vw";
     } 
     //push wave points and rectange svg to local drawData
@@ -69,17 +69,10 @@ function Sketch(){
       }
  
       //drawData.rectangles.modFlows.push(<p style={{position: "absolute", left: modPosX + "%", fontSize: "1vw", background: "blue" }}>3</p>);
-      drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} x={drawData.values.barPosX -1} y="102">{Math.round(calcData.modCashFlows[value])}</text>)
+      drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} x={drawData.values.barPosX -1} y="110">{Math.round(calcData.modCashFlows[value])}</text>)
       drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
     }
 
-    
-    // function getModFlowBox(modValue, leftPad) {
-    //   let boxWidth = 50;
-    //   return (
-    //     <p style= {{position: "absolute", left: leftPad, width: boxWidth, background: "blue"}}>{modValue}</p>
-    //   )
-    // }
   }
   else {
     drawData = animDrawData;

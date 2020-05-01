@@ -166,9 +166,9 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
         xLimit: xLimit,
         yLimit: yLimit,
         xMin: 0,
-        xMax: 0,
-        yMin: 0,
-        yMax: 0,
+        xMax: 100,
+        yMin: -1,
+        yMax: 1,
         padLeft: 0,
         padTop: 0,
         xMultiplier: 1,
@@ -184,9 +184,9 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
             xAscending: data[set].slice(),
             yAscending: data[set].slice(),
             xMin: 0,
-            xMax: 0,
-            yMin: 0,
-            yMax: 0,
+            xMax: 100,
+            yMin: -1,
+            yMax: 1,
             xLimit: xLimit,
             yLimit: yLimit,
             padLeft: 0,
@@ -208,10 +208,10 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
 
         //if range hasnt been specified, dynamically create it
         if (!range) {
-            sortedData.xMin = sortedData.xAscending[0][0];
-            sortedData.xMax = sortedData.xAscending[lastEntry][0];
-            sortedData.yMin = sortedData.yAscending[0][1];
-            sortedData.yMax = sortedData.yAscending[lastEntry][1];
+            sortedData.xMin = parseFloat(sortedData.xAscending[0][0]);
+            sortedData.xMax = parseFloat(sortedData.xAscending[lastEntry][0]);
+            sortedData.yMin = parseFloat(sortedData.yAscending[0][1]);
+            sortedData.yMax = parseFloat(sortedData.yAscending[lastEntry][1]);
 
             //if the ranges of the dataset's mins/ maxs exceed the combined data min max, update the combined
             if (sortedData.xMin < combinedData.xMin) {
@@ -230,10 +230,10 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
         }
         else {
             //set the range to specified if it has been specified
-            sortedData.xMin = range[0][0];
-            sortedData.xMax = range[1][0];
-            sortedData.yMin = range[0][1];
-            sortedData.yMax = range[1][1];
+            sortedData.xMin = parseFloat(range[0][0]);
+            sortedData.xMax = parseFloat(range[1][0]);
+            sortedData.yMin = parseFloat(range[0][1]);
+            sortedData.yMax = parseFloat(range[1][1]);
             combinedData.xMin = sortedData.xMin;
             combinedData.xMax = sortedData.xMax;
             combinedData.yMin = sortedData.yMin;
@@ -272,28 +272,25 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
     combinedData.yDiff = combinedData.yMax - combinedData.yMin;
 
     //if there is no range differnece, make one
-    if (combinedData.xDiff === 0) {
-        combinedData.xMax += 10;
+    if (combinedData.xDiff < 10) {
+        combinedData.xMax += 5;
+        combinedData.xMin -= 5;
+        combinedData.xDiff += 10;
     }
 
-    if (combinedData.yDiff === 0) {
-        combinedData.yMax += 10;
+    if (combinedData.yDiff < 10) {
+        combinedData.yMin -=5
+        combinedData.yMax += 5;
+        combinedData.yDiff += 10;
     }
 
-    if (combinedData.xDiff !== 0) {
+  
         combinedData.xMultiplier = combinedData.xLimit / combinedData.xDiff;
-    }
-    else {
-        combinedData.xMultiplier = 1
-    }
-
-    if (combinedData.yDiff !== 0) {
+ 
+   
         combinedData.yMultiplier = combinedData.yLimit / combinedData.yDiff;
 
-    }
-    else {
-        combinedData.yMultiplier = 1;
-    }
+ 
 
     if (combinedData.drawFree === false) {
 
@@ -381,6 +378,7 @@ export function getYAxisSVG(sortedData, styles) {
             tickArray.push(getPathSVG("ytickline" + i, [[sortedData.padLeft, rulerPosition - (rulerOffset * i)], [100 - sortedData.padLeft, rulerPosition - (rulerOffset * i)]], styles.tickColor, styles.tickLineSize));
         }
     }
+    console.log(sortedData);
 
     let label = getTextSVG("ylabeltext", styles.yName, [(-middleX / 2) / heightMultiplier, sortedData.padLeft * 1.3], styles.fontSize, styles.fontColor);
 
@@ -395,7 +393,7 @@ export function getYAxisSVG(sortedData, styles) {
 }
 export function getZeroLine(sortedData, styles) {
 
-    if (sortedData.yMin <= 0 && sortedData.yMax > 0) {
+    if (sortedData.yMin < 0 && sortedData.yMax > 0) {
         let y = sortedData.yLimit - ((0 - sortedData.yMin) * sortedData.yMultiplier) + sortedData.padTop;
         let range = [[], []];
         range = [[sortedData.padLeft, y], [100 - sortedData.padLeft, y]];
@@ -502,6 +500,9 @@ export function LineMarkGraph(data, styles) {
         background: "none",
     }
 
+
+       
+
     //load default data if none present
     if (!data) {
         data = {
@@ -523,7 +524,7 @@ export function LineMarkGraph(data, styles) {
 
 
 
-    //let aSquare = getRectangleSVG("sq", [0,0], 100, 20, "red");
+    //aSquare = getRectangleSVG("sq", [0,0], 100, 20, "red");
     //let aCircle = GetCircleSvg("circ", "blue", "none", "none", 90, 90, 1,  );
     
     let combinedData = sortXYArray(data, 80, 80);
