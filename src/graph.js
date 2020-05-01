@@ -24,25 +24,31 @@ function Graph()  {
     yTicks: 4,
     tickColor: "#E8E8E8	",
     tickLineSize: .1,
-    clickPointColor: "#C18FE4",
+    clickPointColor: "#47C4C1",
     pointSize: 1,
     selectedPointSize: 2,
     xName: "DISCOUNT RATE",
     yName: "NPV",
-    zeroLineColor: "#FFAAAA",
+    zeroLineColor: "#47C4C1",
     zeroLineSize: .3,
     background: "none",
+    displayInit: "DISCOUNT RATE: 0 NPV: 0",
+    displayFontSize: ".15vw",
+    displayFontWeight: "bold",
+    displayColor: "black"
+  
   }
 
-  console.log(calcData.npvSnap);
+ 
   let calcInput = [[0,0]];
   if (calcData.npvSnap != 0) {
     calcInput = calcData.npvSnap
   }
 
 
+let lineColor = styles.gray
   let data = {
-    "#47C4C1": calcInput
+    "#C2C2C2": calcInput
   };
 
 

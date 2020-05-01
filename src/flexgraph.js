@@ -20,8 +20,13 @@ function invertHex(hex) {
 function diff(a, b) { return Math.abs(a - b); }
 
 export function getValueDisplay(sortedData, styles) {
+    // console.log(sortedData);
+    // console.log("called display");
+    if (display === "") {
+        display = styles.displayInit;
+    }
 
-    let label = getTextSVG("displaytext", display, [40, sortedData.padTop * .9 + "%"], styles.fontSize, styles.clickPointColor);
+    let label = getTextSVG("displaytext", display, [33, sortedData.padTop * .4 + "%"], styles.displayFontSize, styles.displayColor, styles.displayFontWeight);
     return <svg>{label}</svg>
 
 }
@@ -317,7 +322,7 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
     return (combinedData);
 
 }
-export function getTextSVG(key, display, xy, fontSize, color) {
+export function getTextSVG(key, display, xy, fontSize, color, fontWeight) {
     if (!xy) {
         xy = [1, 10];
     }
@@ -328,7 +333,7 @@ export function getTextSVG(key, display, xy, fontSize, color) {
         color = "black";
     }
 
-    return (<text key={key} style={{ fontSize: fontSize }} fill={color} x={xy[0]} y={xy[1]}>{display}</text>);
+    return (<text key={key} style={{ fontSize: fontSize, fontWeight: fontWeight}} fill={color} x={xy[0]} y={xy[1]}>{display}</text>);
 }
 
 export function getXAxisSVG(sortedData, styles) {
@@ -378,7 +383,7 @@ export function getYAxisSVG(sortedData, styles) {
             tickArray.push(getPathSVG("ytickline" + i, [[sortedData.padLeft, rulerPosition - (rulerOffset * i)], [100 - sortedData.padLeft, rulerPosition - (rulerOffset * i)]], styles.tickColor, styles.tickLineSize));
         }
     }
-    console.log(sortedData);
+
 
     let label = getTextSVG("ylabeltext", styles.yName, [(-middleX / 2) / heightMultiplier, sortedData.padLeft * 1.3], styles.fontSize, styles.fontColor);
 

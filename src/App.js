@@ -28,7 +28,8 @@ export let calcData = {
   r: 50,
   testVar: 0,
   irr: null,
-  discountFactor: .67
+  discountFactor: .67,
+  avgNpvYr: 0
 };
 export let styles = {
   canvasWidth: canvasWidth,
@@ -317,21 +318,12 @@ const header3 = {
 
 
 const arrow1Style = {
-  position: "relative",
+  position: "static",
+  background: "none",
   paddingLeft: "27%",
   paddingTop: "20%"
-}
-const arrow2Style = {
-  position: "relative",
-  paddingLeft: "27%",
-  paddingTop: "0%"
 }
 
-const arrow3Style = {
-  position: "relative",
-  paddingLeft: "27%",
-  paddingTop: "20%"
-}
 
 
 
@@ -378,7 +370,12 @@ function instructionText() {
     <div>
       <p style={instructionTitle}>INSTRUCTIONS</p>
       <p style = {instructTextStyle}>1. Enter as many cash flow periods as you'd like. The # inside the dollar sign represents the # of periods in the future where: </p>
-     <p style = {instructTextCenter}>{dollSymbol(0, "black")} = dollars in Period 0 (present day) </p>
+      <p style= {{position: "absolute", left: "12%", top: "23%"}}>{dollSymbol(0, "black")}</p>
+     <p style = {instructTextCenter}> = dollars in Period 0 (present day) </p>
+     <p style = {instructTextStyle}>2. When you adjust the discount rate, all future cash flows become "converted" into present day units.</p>
+     <a  style= {instructTextStyle} href="url">See part 1 + 2 of NPV Video</a>
+     <p style = {instructTextStyle}>3. More instructions and links will go here in the finished version</p>
+
     </div>
   )
 }
@@ -404,16 +401,19 @@ function dollSymbol(value, color) {
   ) 
 }
 
+
+//the bottom arrow is getting shifted up whenever the page reloads for some reason
 function arrow() {
-  let path = getPathSVG("drawArrow", [[0,0], [0,6], [1.5,3]], "none", 0, 0, 0, "black")
-  let path2 = getPathSVG("drawArrow", [[60,0], [60,6], [61.5,3]], "none", 0, 0, 0, "black")
-  let path3 = getPathSVG("drawArrow", [[74,49], [77.5,49], [75.75,52]], "none", 0, 0, 0, "black")
+  let bottomArrowLeft = 74;
+  let bottomArrowTop = 58;
+  let firstArrow = getPathSVG("drawArrow", [[0,0], [0,6], [1.5,3]], "none", 0, 0, 0, "black")
+  let secondArrow = getPathSVG("secondarrow", [[60,0], [60,6], [61.5,3]], "none", 0, 0, 0, "black")
+  let thirdArrow = getPathSVG("thirdarrow", [[bottomArrowLeft,bottomArrowTop], [bottomArrowLeft+3.5,bottomArrowTop], [bottomArrowLeft+1.75,bottomArrowTop + 3]], "none", 0, 0, 0, "black")
   let viewBox = "0 0 100 100";
-  return ( <svg viewBox = {viewBox} >{path}{path2}{path3}</svg>)
+
+  return ( <svg viewBox = {viewBox} >{firstArrow}{secondArrow}{thirdArrow}</svg>)
   
 };
-
-
 
 function App() {
 
@@ -429,7 +429,7 @@ let zeroCashInputStyle = {
   background: "none",
   width: "80%",
   height: "22%",
-  fontSize: ".8vw",
+  fontSize: ".7vw",
   border: "none",
   color: styles.negativeColor
 }
@@ -582,8 +582,9 @@ function DiscountRateSlider() {
 
 return (
   <div style={calcCanvas}>
-    <div style={arrow1Style}>{arrow()}</div>
+    
     <p style={calcTitle}>NET PRESENT VALUE CALCULATOR</p>
+    <div style={arrow1Style}>{arrow()}</div>
     <div style={cashFlowBox}><p style={header1}>CASH FLOWS</p>
       <div style={innerCashBox}>{CashFlowContents()}</div>
       <div style={cashBottom}>{cashFlowPlusBtn()}</div>
@@ -602,13 +603,16 @@ return (
       <Sketch/>
     </div>
     
-    <div style={NpvStatBox}><p style={header1}>NET PRESENT VALUE</p>  
-      <p style={NPVHeader}>{calcData.theNPV}</p>     
+    <div style={NpvStatBox}>
+      <p style={header1}>NET PRESENT VALUE</p>  
+      <p style={NPVHeader}>{calcData.theNPV}</p> 
+      <p style={header1}>AVG NPV PER YEAR</p>  
+      <p style={NPVHeader}>{calcData.avgNpvYr}</p>     
       <div style={snapButtonPos}>{snapNPVBtn()}</div>
     </div>
 
     <div style ={graphBox}>
-      <p style={header1}>DISCOUNT RATE V. NPV</p> 
+ 
       <Graph/>
     </div>
 
@@ -641,6 +645,7 @@ return (
     }
    
     npvOut =  Math.round((npv - calcData.initialInvest) * 100) / 100;
+    calcData.avgNpvYr = (npvOut/cashFlows.length).toFixed(2);
     calcData.theNPV = npvOut.toFixed(2);
     
     //return (npvOut);
