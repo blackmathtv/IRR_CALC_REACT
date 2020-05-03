@@ -1,13 +1,5 @@
 import React from 'react';
-// import initReactFastclick from 'react-fastclick';
-// initReactFastclick();
 
-//!!!!! YOU NEED TO FIX THE BUG WHERE NO DATA= CRASH
-
-let canvasWidth = 80;
-let canvasHeight = 40;
-let heightMultiplier = canvasWidth / canvasHeight;
-let viewBox = "0 0 100 " + (100 / heightMultiplier).toString();
 let display = "";
 
 function rndNearTenth(num) {
@@ -20,18 +12,16 @@ function invertHex(hex) {
 function diff(a, b) { return Math.abs(a - b); }
 
 export function getValueDisplay(sortedData, styles) {
-    // console.log(sortedData);
-    // console.log("called display");
     if (display === "") {
         display = styles.displayInit;
     }
 
     let label = getTextSVG("displaytext", display, [33, sortedData.padTop * .4 + "%"], styles.displayFontSize, styles.displayColor, styles.displayFontWeight);
-    return <svg>{label}</svg>
+    return <svg key="valuedisplay">{label}</svg>
 
 }
 
-export function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, strokeWidth, radius, mouseDown, mouseOut, mouseOver) {
+export function getRectangleSVG(key, styles, topLeftPoint, width, height, fill, strokeColor, strokeWidth, radius, mouseDown, mouseOut, mouseOver) {
     return (
         <rect
             key={key}
@@ -49,13 +39,14 @@ export function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeCo
 }
 
 
-export function GetCircleSvg(key, fill, strokeColor, strokeWidth, centerX, centerY, xRadius, yRadius, onClick, mouseOver, mouseExit) {
-
+export function GetCircleSvg(key, styles, fill, strokeColor, strokeWidth, centerX, centerY, xRadius, yRadius, onClick, mouseOver, mouseExit) {
+    styles.heightMultiplier = parseFloat(styles.canvasWidth) / parseFloat(styles.canvasHeight);
+ 
     if (!yRadius) {
-        yRadius = xRadius * heightMultiplier;
+        yRadius = xRadius * styles.heightMultiplier;
     }
     else {
-        yRadius = yRadius * heightMultiplier;
+        yRadius = yRadius * styles.heightMultiplier;
     }
 
     return (
@@ -74,7 +65,9 @@ export function GetCircleSvg(key, fill, strokeColor, strokeWidth, centerX, cente
     )
 }
 
-export function getPathSVG(key, points, color, strokeWidth, smoothing, dashSize, fill) {
+export function getPathSVG(key, styles, points, color, strokeWidth, smoothing, dashSize, fill) {
+    styles.heightMultiplier = parseFloat(styles.canvasWidth) / parseFloat(styles.canvasHeight);
+ 
     if (!color) {
         color = "black";
     }
@@ -95,12 +88,12 @@ export function getPathSVG(key, points, color, strokeWidth, smoothing, dashSize,
         // build the d attributes by looping over the points
         const d = points.reduce((acc, point, i, a) => i === 0
             // if first point
-            ? `M ${point[0]},${point[1] / heightMultiplier}`
+            ? `M ${point[0]},${point[1] / styles.heightMultiplier}`
             // else
             : `${acc} ${command(point, i, a)}`
             , '')
-
-        return <path key={key} style={{ position: "absolute", width: 7, strokeDasharray: dashSize }} d={d} fill={fill} stroke={color} strokeWidth={strokeWidth} />
+        //removed position absolute i hope that doesnt break anything
+        return <path key={key} style={{ width: 7, strokeDasharray: dashSize }} d={d} fill={fill} stroke={color} strokeWidth={strokeWidth} />
     }
 
 
@@ -141,10 +134,10 @@ export function getPathSVG(key, points, color, strokeWidth, smoothing, dashSize,
 
             // end control point
             const [cpeX, cpeY] = controlPoint(point, a[i - 1], a[i + 1], true)
-            return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${point[0]},${point[1] / heightMultiplier}`
+            return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${point[0]},${point[1] / styles.heightMultiplier}`
         }
         else {
-            return `L ${point[0]} ${point[1] / heightMultiplier}`
+            return `L ${point[0]} ${point[1] / styles.heightMultiplier}`
         }
     }
 
@@ -341,7 +334,7 @@ export function getXAxisSVG(sortedData, styles) {
     let tickArray = [];
 
     let middleX = ((100 - sortedData.padLeft) + sortedData.padLeft / 2) / 2;
-    let xLine = getPathSVG("xLine", [[sortedData.padLeft, 100 - sortedData.padTop], [100 - sortedData.padLeft, 100 - sortedData.padTop]], styles.axisColor, styles.axisLineSize);
+    let xLine = getPathSVG("xLine", styles, [[sortedData.padLeft, 100 - sortedData.padTop], [100 - sortedData.padLeft, 100 - sortedData.padTop]], styles.axisColor, styles.axisLineSize);
 
     let rulerOffset = sortedData.xLimit / styles.xTicks;
     let rulerStep = diff(sortedData.xMin, sortedData.xMax) / styles.xTicks;
@@ -350,7 +343,7 @@ export function getXAxisSVG(sortedData, styles) {
         //push ruler values to text array spaced out evenly
         textArray.push(getTextSVG("xrulerValue" + i, Math.round(sortedData.xMin + (rulerStep * i)), [rulerPosition + (rulerOffset * i) + "%", 100 - (sortedData.padTop / 2) + "%"], styles.fontSize, styles.fontColor));
         if (i >= 1) {
-            tickArray.push(getPathSVG("xTick" + i, [[rulerPosition + (rulerOffset * i), 100 - sortedData.padTop], [rulerPosition + (rulerOffset * i), sortedData.padTop]], styles.tickColor, styles.tickLineSize));
+            tickArray.push(getPathSVG("xTick" + i, styles, [[rulerPosition + (rulerOffset * i), 100 - sortedData.padTop], [rulerPosition + (rulerOffset * i), sortedData.padTop]], styles.tickColor, styles.tickLineSize, 0, 1));
 
         }
     }
@@ -358,7 +351,7 @@ export function getXAxisSVG(sortedData, styles) {
     textArray.push(getTextSVG("xNameText", styles.xName, [100 - middleX / 2, 100 - (sortedData.padTop * 1.2) + "%"], styles.fontSize, styles.fontColor));
 
     return (
-        <svg  >
+        <svg key="xaxissvg" >
             {textArray}
             {tickArray}
             {xLine}
@@ -371,7 +364,7 @@ export function getYAxisSVG(sortedData, styles) {
     let tickArray = [];
 
     let middleX = ((100 - sortedData.padLeft) + sortedData.padLeft / 2) / 2;
-    let yLine = getPathSVG("yLine", [[sortedData.padLeft, 100 - sortedData.padTop], [sortedData.padLeft, sortedData.padTop]], styles.axisColor, styles.axisLineSize);
+    let yLine = getPathSVG("yLine", styles, [[sortedData.padLeft, 100 - sortedData.padTop], [sortedData.padLeft, sortedData.padTop]], styles.axisColor, styles.axisLineSize);
 
     let rulerOffset = sortedData.yLimit / styles.yTicks; //the offset for thephysical position on the canvas
     let rulerStep = diff(sortedData.yMin, sortedData.yMax) / styles.yTicks; //the value offset 
@@ -380,15 +373,15 @@ export function getYAxisSVG(sortedData, styles) {
         //push ruler values to text array spaced out evenly
         textArray.push(getTextSVG("yrulervalue" + i, Math.round(sortedData.yMin + (rulerStep * i)), [(sortedData.padLeft / 2) + "%", rulerPosition - (rulerOffset * i) + "%"], styles.fontSize, styles.fontColor));
         if (i >= 1) {
-            tickArray.push(getPathSVG("ytickline" + i, [[sortedData.padLeft, rulerPosition - (rulerOffset * i)], [100 - sortedData.padLeft, rulerPosition - (rulerOffset * i)]], styles.tickColor, styles.tickLineSize));
+            tickArray.push(getPathSVG("ytickline" + i, styles, [[sortedData.padLeft, rulerPosition - (rulerOffset * i)], [100 - sortedData.padLeft, rulerPosition - (rulerOffset * i)]], styles.tickColor, styles.tickLineSize, 0, 1));
         }
     }
 
 
-    let label = getTextSVG("ylabeltext", styles.yName, [(-middleX / 2) / heightMultiplier, sortedData.padLeft * 1.3], styles.fontSize, styles.fontColor);
+    let label = getTextSVG("ylabeltext", styles.yName, [(-middleX / 2) / styles.heightMultiplier, sortedData.padLeft * 1.3], styles.fontSize, styles.fontColor);
 
     return (
-        <svg>
+        <svg key="yaxissvg">
             <g transform='rotate(-90)' >{label}</g>
             {textArray}
             {tickArray}
@@ -402,10 +395,10 @@ export function getZeroLine(sortedData, styles) {
         let y = sortedData.yLimit - ((0 - sortedData.yMin) * sortedData.yMultiplier) + sortedData.padTop;
         let range = [[], []];
         range = [[sortedData.padLeft, y], [100 - sortedData.padLeft, y]];
-        let path = getPathSVG("zeroline", range, styles.zeroLineColor, styles.zeroLineSize, false, .8);
+        let path = getPathSVG("zeroline", styles, range, styles.zeroLineColor, styles.zeroLineSize, false, 1);
         let text = getTextSVG("0LineMark", "0", [100 - sortedData.padLeft / 1.2, y + "%"], styles.fontSize, styles.zeroLineColor)
         return (
-            <svg>
+            <svg key= "zeroLine">
                 {text}
                 {path}
             </svg>
@@ -420,40 +413,47 @@ export function getZeroLine(sortedData, styles) {
 
 export function GraphPoints(key, sortedData, styles) {
     let circleArray = [];
-
     const [selectedPoint, setSelectedPoint] = React.useState([]);
     const [hovered, setHovered] = React.useState([]);
    
 
-    function handlePointClick(set, pair) {
+    function handlePointClick(xVal, yVal) {
 
-        let xVal = sortedData[set].xAscending[pair][0];
-        let yVal = sortedData[set].xAscending[pair][1];
         display = styles.xName + ": " + xVal + " " + styles.yName + ": " + yVal;
-        setSelectedPoint([set, pair]);
+        setSelectedPoint([xVal, yVal]);
 
     }
     
     for (let set in sortedData) {
+        let alreadySelected = false;
         for (let pair in sortedData[set].drawArray) {
             let color = sortedData[set].color;
             let radius = styles.pointSize;
+            
+            //the draw coordinates
+            let xDraw = sortedData[set].drawArray[pair][0];
+            let yDraw = sortedData[set].drawArray[pair][1];
 
-            if (set === selectedPoint[0] && pair === selectedPoint[1]) {
+            //the unmodified data points
+            let currentPair = sortedData[set].xAscending[pair];
+            let xVal = currentPair[0];
+            let yVal = currentPair[1];
+            
+            if (currentPair[0] === selectedPoint[0] && currentPair[1] === selectedPoint[1] && alreadySelected === false) {
                 color = styles.clickPointColor;
+                alreadySelected = true;
                 radius = styles.selectedPointSize;
             }
             if (set === hovered[0] && pair === hovered[1]) {
                 radius = styles.selectedPointSize;
             }
 
-            let xDraw = sortedData[set].drawArray[pair][0];
 
-            let yDraw = sortedData[set].drawArray[pair][1];
             let mouseOver = () => setHovered([set, pair]);
             let mouseExit = () => setHovered([]);
-            let mouseDown = () => { handlePointClick(set, pair) };
-            circleArray.push(GetCircleSvg(key + pair + set, color, "none", "none", xDraw, yDraw, radius, radius, mouseDown, mouseOver, mouseExit));
+            let mouseDown = () => { handlePointClick(xVal, yVal) };
+   
+            circleArray.push(GetCircleSvg(key + pair + set, styles, color, "none", "none", xDraw, yDraw, radius, radius, mouseDown, mouseOver, mouseExit));
         }
 
     }
@@ -475,9 +475,18 @@ export function getBoxAxis(sortedData, styles) {
         </g>
     )
 }
-export function getCanvasBounds(styles) {
-    heightMultiplier = parseInt(styles.canvasWidth) / parseInt(styles.canvasHeight);
-    viewBox = "0 0 100 " + (100 / heightMultiplier).toString();
+   
+export function drawCanvas(key, styles, Sketch) {       
+    styles.heightMultiplier = parseFloat(styles.canvasWidth) / parseFloat(styles.canvasHeight);
+    let ViewBox = "0 0 100 " + (100 / styles.heightMultiplier).toString();
+
+    return (
+        <div key = {key} style={{ position: "absolute", top: styles.canvasPadTop, left: styles.canvasPadLeft, width: styles.canvasWidth, height: styles.canvasHeight }}>
+            <svg style={{ background: styles.canvasColor }} viewBox={ViewBox}>
+                {Sketch}
+            </svg>
+        </div>   
+    )
 }
 
 export function LineMarkGraph(data, styles) {
@@ -507,7 +516,6 @@ export function LineMarkGraph(data, styles) {
     }
 
 
-       
 
     //load default data if none present
     if (!data) {
@@ -522,22 +530,17 @@ export function LineMarkGraph(data, styles) {
         styles = defaults;
     }
     //apply canvas size in styles to global canvas
-    getCanvasBounds(styles);
+
 
 
     let Paths = [];
     let plots = [];
 
-
-
-    //aSquare = getRectangleSVG("sq", [0,0], 100, 20, "red");
-    //let aCircle = GetCircleSvg("circ", "blue", "none", "none", 90, 90, 1,  );
-    
     let combinedData = sortXYArray(data, 80, 80);
     let sortedData = combinedData.sortedData;
     for (let set in sortedData) {
 
-        let Path = getPathSVG("graphPath" + set, sortedData[set].drawArray, sortedData[set].color, styles.lineSize);
+        let Path = getPathSVG("graphPath" + set, styles, sortedData[set].drawArray, sortedData[set].color, styles.lineSize);
         Paths.push(Path);
 
 
@@ -548,23 +551,27 @@ export function LineMarkGraph(data, styles) {
     let XAxis = getXAxisSVG(combinedData, styles);
     let YAxis = getYAxisSVG(combinedData, styles);
     let zeroLine = getZeroLine(combinedData, styles);
-
-    let displaySVG = getValueDisplay(combinedData, styles);
     
+    let displaySVG = getValueDisplay(combinedData, styles);
+    let canvas = drawCanvas("LineMarkCanvas", styles, [zeroLine,XAxis,YAxis,Paths,plots,displaySVG] );
     return (
-        <div style={{ position: "absolute", top: styles.canvasPadTop, left: styles.canvasPadLeft, width: styles.canvasWidth, height: styles.canvasHeight }}>
-            <svg style={{ background: styles.background }} viewBox={viewBox}>
-                {zeroLine}{XAxis}{YAxis}{Paths}{plots}{displaySVG}
-            </svg>
-        </div>
+      canvas
     )
     
 }
 
+export function flexButton(key, styles, mouseDown, mouseHover, mouseExit) {
+    styles.heightMultiplier = parseFloat(styles.canvasWidth) / parseFloat(styles.canvasHeight);
 
+    let button = getRectangleSVG("flexButtonrect", styles, [0,0], 100, 100, styles.btnColor, styles.btnStrokeColor, styles.btnStrokeWidth, styles.btnRadius, mouseDown, mouseExit, mouseHover)
+    //let text = getTextSVG("btninnertext", styles.btnDisplay,[0,0], styles.btnFontSize,styles.btnFontColor,styles.btnFontWeight);
+
+    let text = getTextSVG("btninnertext", styles.btnDisplay, [2,15], 12)
+    let canvas = drawCanvas(key, styles, [button, text]);
+    return(canvas);
+}
 
 export function DrawShapesGraph(data, styles) {
-  
 
     let defaults = {
         canvasWidth: "40vw",
@@ -589,7 +596,6 @@ export function DrawShapesGraph(data, styles) {
         yName: "thangz",
         zeroLineSize: .3,
         background: "none",
-
     }
 
     //load default data if none present
@@ -603,30 +609,20 @@ export function DrawShapesGraph(data, styles) {
     if (!styles) {
         styles = defaults;
     }
-    getCanvasBounds(styles);
 
     let Paths = [];
     
     let combinedData = sortXYArray(data, 80, 80, true, [[0, 0], [100, 100]]);
     let sortedData = combinedData.sortedData;
     for (let set in sortedData) {
-
-        let Path = getPathSVG("graphPath" + set, sortedData[set].drawArray, sortedData[set].color, styles.lineSize, 0, 0, sortedData[set].color);
+        let Path = getPathSVG("graphPath" + set, styles, sortedData[set].drawArray, sortedData[set].color, styles.lineSize, 0, 0, sortedData[set].color);
         Paths.push(Path);
-
-
     }
 
     let displaySVG = getValueDisplay(combinedData, styles);
     let boxAxis = getBoxAxis(combinedData, styles);
-
-    return (
-        <div style={{ position: "absolute", left: styles.canvasPadLeft, top: styles.canvasPadTop, width: styles.canvasWidth, height: styles.canvasHeight }}>
-            <svg style={{ background: styles.background }} viewBox={viewBox}>
-                {boxAxis}{Paths}{displaySVG}
-            </svg>
-        </div>
-    )
+    let canvas = drawCanvas("shapescanvas", styles, [boxAxis,Paths,displaySVG]);
+    return (canvas);
 
 }
 

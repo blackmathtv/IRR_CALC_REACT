@@ -38,9 +38,9 @@ function Sketch(){
   if (updateData){
     drawData = GetDrawData();
     let numBars = drawData.values.drawBarHeights.length;
-    let  textWidth = ".5vw";
+    let  textWidth = "50%";
     if (numBars >= 4) {
-    textWidth = (2/numBars) + "vw";
+    textWidth = (2/numBars)*100 + "%";
     } 
     //push wave points and rectange svg to local drawData
     for (var value in drawData.values.drawBarHeights) {
@@ -52,7 +52,8 @@ function Sketch(){
           drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value]]);         
           //drawData.points.negWavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
           drawData.points.negWavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.drawBoxHeight]);
-          
+          drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} fill={styles.positiveColor} x={drawData.values.barPosX -1} y="110">{Math.round(calcData.modCashFlows[value])}</text>)
+          drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
          
       }
       else if (drawData.values.drawBarHeights[value] < 0) {
@@ -63,14 +64,14 @@ function Sketch(){
           drawData.points.negWavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value] * -1]);
           //  drawData.points.wavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
           drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.drawBoxHeight]);
-          
+          drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} fill={styles.negativeColor} x={drawData.values.barPosX -1} y="110">{Math.round(calcData.modCashFlows[value])}</text>)
+          drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
           
           
       }
  
       //drawData.rectangles.modFlows.push(<p style={{position: "absolute", left: modPosX + "%", fontSize: "1vw", background: "blue" }}>3</p>);
-      drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} x={drawData.values.barPosX -1} y="110">{Math.round(calcData.modCashFlows[value])}</text>)
-      drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
+
     }
 
   }
