@@ -86,27 +86,44 @@ function Sketch(){
     }
   }
 
-  return(
-    <div>
-      <svg
-        style={{
-        position: "absolute",
-        background: 'none',
-        top: "10%",
-        left: "5%",
-        width: "90%", 
-        height: "80%"
-        }}
-        viewBox="0 0 200 100"
-      >{drawData.rectangles.bars}{drawData.rectangles.modFlows}{drawData.rectangles.glass}{path}
-      </svg>
+  if(drawData.rectangles.bars.length > 0){
+    return(
       <div>
-      {/* <button name="animate" onClick ={ () => {updateData= false; animDrawData = drawData; runSpring()}}>Animate Waves</button>   */}
-      
+        <svg
+          style={{
+          position: "absolute",
+          background: 'none',
+          top: "10%",
+          left: "5%",
+          width: "90%", 
+          height: "80%"
+          }}
+          viewBox="0 0 200 100"
+        >{drawData.rectangles.bars}{drawData.rectangles.modFlows}{drawData.rectangles.glass}{path}
+        </svg>
+        <div>
+        {/* <button name="animate" onClick ={ () => {updateData= false; animDrawData = drawData; runSpring()}}>Animate Waves</button>   */}
+        
+        </div>
       </div>
-    </div>
 
-  );
+    );
+  }
+  else {
+    const noCashFlowsStyle = {
+      textAlign: "left",
+      marginLeft: "1vw",
+      fontSize: "1vw",
+      fontStyle: "montserrat",
+    }
+    return (
+    <div>
+      <p style={noCashFlowsStyle}>To get started,</p>
+      <p style={noCashFlowsStyle}>input some cashflows in the box on the left</p>
+    </div>
+      
+      )
+  }
 }
 
 //const lineCommand = point => `L ${point[0]} ${point[1]}`

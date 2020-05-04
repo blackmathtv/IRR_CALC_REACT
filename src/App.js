@@ -647,7 +647,7 @@ function App() {
         <Sketch />
       </div>
 
-      <div style={NpvStatBox}>{plotButton()}
+      <div style={NpvStatBox}>{}
         <p style={header1}>NET PRESENT VALUE</p>
         <p style={NPVHeader}>{calcData.theNPV}</p>
         <p style={header1}>AVG NPV PER YEAR</p>
