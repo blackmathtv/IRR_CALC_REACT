@@ -17,7 +17,7 @@ function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, st
 }
 
 function GetDrawData () {
-    console.log("Ran GetDrawData");
+    //console.log("Ran GetDrawData");
    
     
     //values Before 

@@ -21,19 +21,22 @@ export function getValueDisplay(sortedData, styles) {
 
 }
 
-export function getRectangleSVG(key, styles, topLeftPoint, width, height, fill, strokeColor, strokeWidth, radius, mouseDown, mouseOut, mouseOver) {
+export function getRectangleSVG(key, styles, mouseDown, mouseOut, mouseOver, mouseUp) {
     return (
         <rect
             key={key}
-            x={topLeftPoint[0] + "%"} y={topLeftPoint[1] + "%"} //array [x,y]
-            width={width + "%"} height={height + "%"}
-            fill={fill} //string
-            stroke={strokeColor} //string
-            strokeWidth={strokeWidth}
-            rx={radius}
+            x={styles.topLeftPoint[0] + "%"} y={styles.topLeftPoint[1] + "%"} //array [x,y]
+            width={styles.width + "%"} height={styles.height + "%"}
+            fill={styles.fill} //string
+            stroke={styles.strokeColor} //string
+            strokeWidth={styles.strokeWidth}
+            rx={styles.radius}
             onMouseDown={mouseDown}
+            onMouseUp={mouseUp}
             onMouseOut={mouseOut}
             onMouseOver={mouseOver}
+            opacity={styles.opacity}
+            style={{cursor: styles.cursor, boxShadow: "1px 3px 1px #9E9E9E"}}
         />
     )
 }
@@ -315,7 +318,7 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
     return (combinedData);
 
 }
-export function getTextSVG(key, display, xy, fontSize, color, fontWeight) {
+export function getTextSVG(key, display, xy, fontSize, color, fontWeight,userSelect) {
     if (!xy) {
         xy = [1, 10];
     }
@@ -326,7 +329,7 @@ export function getTextSVG(key, display, xy, fontSize, color, fontWeight) {
         color = "black";
     }
 
-    return (<text key={key} style={{ fontSize: fontSize, fontWeight: fontWeight}} fill={color} x={xy[0]} y={xy[1]}>{display}</text>);
+    return (<text key={key} style={{userSelect: userSelect, fontSize: fontSize, fontWeight: fontWeight}} fill={color} x={xy[0]} y={xy[1]}>{display}</text>);
 }
 
 export function getXAxisSVG(sortedData, styles) {
@@ -463,9 +466,18 @@ export function GraphPoints(key, sortedData, styles) {
     return (circleArray);
 }
 export function getBoxAxis(sortedData, styles) {
-    let width = 100 - (sortedData.padLeft * 2);
-    let height = 100 - (sortedData.padTop * 2);
-    let box = getRectangleSVG("boxAxis", [sortedData.padLeft, sortedData.padTop], width, height, "none", styles.boxAxisColor, styles.axisLineSize, styles.boxRadius)
+    let boxStyle = {
+        topLeftPoint: [sortedData.padLeft, sortedData.padTop], 
+        width: 100 - (sortedData.padLeft * 2), 
+        height: 100 - (sortedData.padTop * 2), 
+        fill: "none", 
+        strokeColor: styles.boxAxisColor, 
+        strokeWidth: styles.axisLineSize, 
+        radius: styles.boxRadius, 
+
+    }
+;
+    let box = getRectangleSVG("boxAxis", boxStyle);
     let XAxis = getXAxisSVG(sortedData, styles);
     let YAxis = getYAxisSVG(sortedData, styles);
 
@@ -560,14 +572,103 @@ export function LineMarkGraph(data, styles) {
     
 }
 
-export function flexButton(key, styles, mouseDown, mouseHover, mouseExit) {
+export function FlexButton(key, styles, mouseDown, mouseHover, mouseExit) {
     styles.heightMultiplier = parseFloat(styles.canvasWidth) / parseFloat(styles.canvasHeight);
+    
 
-    let button = getRectangleSVG("flexButtonrect", styles, [0,0], 100, 100, styles.btnColor, styles.btnStrokeColor, styles.btnStrokeWidth, styles.btnRadius, mouseDown, mouseExit, mouseHover)
+    let buttonStyle = {
+        main: {
+            topLeftPoint: [0,0], 
+            width: 98, 
+            height: 92, 
+            fill: styles.btnColor, 
+            strokeColor: styles.btnStrokeColor, 
+            strokeWidth: styles.btnStrokeWidth, 
+            radius: styles.btnRadius, 
+        },
+
+        cover: {
+            topLeftPoint: [0,0], 
+            width: 100 , 
+            height: 100, 
+            fill: styles.btnColor, 
+            strokeColor: styles.btnStrokeColor, 
+            strokeWidth: styles.btnStrokeWidth, 
+            radius: styles.btnRadius, 
+            opacity: 0,
+            cursor: "pointer"
+        },
+
+        shadow: {
+            topLeftPoint: [0,0], 
+            width: 100 , 
+            height: 100, 
+            fill: "black", 
+            strokeColor: styles.btnStrokeColor, 
+            strokeWidth: styles.btnStrokeWidth, 
+            radius: styles.btnRadius, 
+            opacity: .6,    
+        },
+        text: {
+            placement: styles.btnTextRange
+        }
+    }
+
+    let buttonClickedStyle = {
+        main: {
+            topLeftPoint: [1, 6], 
+            width: buttonStyle.main.width, 
+            height: buttonStyle.main.height, 
+            fill: styles.btnColor, 
+            strokeColor: styles.btnStrokeColor, 
+            strokeWidth: styles.btnStrokeWidth, 
+            radius: styles.btnRadius, 
+        },
+
+        cover: {
+            topLeftPoint: [0,0], 
+            width: 100 , 
+            height: 100, 
+            fill: "white", 
+            strokeColor: styles.btnStrokeColor, 
+            strokeWidth: styles.btnStrokeWidth, 
+            radius: styles.btnRadius, 
+            opacity: 0,
+            cursor: "pointer"
+        },
+
+        shadow: {
+            topLeftPoint: [0, 0], 
+            width: 100, 
+            height: 100, 
+            fill: "black", 
+            strokeColor: styles.btnStrokeColor, 
+            strokeWidth: styles.btnStrokeWidth, 
+            radius: styles.btnRadius, 
+            opacity: .6,
+            
+        },
+        text: {
+            placement: [styles.btnTextRange[0] + .5, styles.btnTextRange[1] + .75]
+        }
+    }
+
+    const [btn, setBtn] = React.useState(buttonStyle);
+
+
+    function moveButton() {
+        setBtn(buttonClickedStyle);
+    }
+    let mouseUp = () =>  setTimeout(function(){setBtn(buttonStyle)}, 50);
+    let mouseDownAction = () => {mouseDown(); moveButton()};
+    let shadow = getRectangleSVG("dropshadow", btn.shadow);
+
+    let button = getRectangleSVG("flexButtonrect", btn.main);
     //let text = getTextSVG("btninnertext", styles.btnDisplay,[0,0], styles.btnFontSize,styles.btnFontColor,styles.btnFontWeight);
+    let buttonCover = getRectangleSVG("flexButtoncover", btn.cover, mouseDownAction, mouseExit, mouseHover, mouseUp);
 
-    let text = getTextSVG("btninnertext", styles.btnDisplay, [2,15], 12)
-    let canvas = drawCanvas(key, styles, [button, text]);
+    let text = getTextSVG("btninnertext", styles.btnDisplay, btn.text.placement, styles.btnFontSize, styles.btnFontColor, styles.btnFontWeight, "none")
+    let canvas = drawCanvas(key, styles, [shadow, button, text, buttonCover]);
     return(canvas);
 }
 

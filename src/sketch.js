@@ -31,7 +31,7 @@ function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, st
 }
 
 function Sketch(){
-  console.log("Ran Sketch");  
+  //console.log("Ran Sketch");  
   
   const [path, setpath] = React.useState();
  

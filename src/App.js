@@ -5,7 +5,7 @@ import Graph from './graph.js';
 import findIRR from './irr.js';
 import GetDrawData from "./drawData.js";
 import Button from '@material-ui/core/Button';
-import { getPathSVG, drawCanvas, flexButton } from "./flexgraph.js";
+import { getPathSVG, drawCanvas, FlexButton } from "./flexgraph.js";
 
 
 export var modCashFlows = [];
@@ -13,7 +13,29 @@ export var modCashFlows = [];
 
 
 
+const dollarFormat = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2
+})
 
+const commaFormat = (number) => Intl.NumberFormat().format(number);
+var idk = "38843,3992"
+const removeCommas = (num) => parseFloat(num.replace(/,/g, '')) 
+
+function rndNearTenth(num) {
+  return parseFloat((Math.round(num * 100) / 100).toFixed(2));
+}
+
+const numFormatter = new Intl.NumberFormat('en-US', {
+  style: "decimal",
+  maximumFractionDigits: 2
+})
+
+var someNumber = -88233442.57674;
+console.log(commaFormat(someNumber));
+console.log(rndNearTenth(939,85.11222))
+console.log(numFormatter.format(someNumber));
 
 let canvasWidth = window.innerWidth * .9;
 let canvasHeight = canvasWidth / 2.32;
@@ -55,9 +77,6 @@ export let styles = {
   secondRowHeight: "34%"
 }
 
-function rndNearTenth(num) {
-  return (Math.round(num * 100) / 100).toFixed(2);
-}
 
 
 const calcCanvas = {
@@ -372,25 +391,7 @@ const instructTextCenter = {
 }
 
 
-function plotButton() {
-  let buttonStyle = {
-    canvasWidth: "60%", 
-    canvasHeight: "15%", 
-    canvasPadLeft:"20%",
-    canvasPadTop:"60%",
-    btnColor:"blue", 
-    btnStrokeColor: "red", 
-    btnStrokeWidth: 1, 
-    btnRadius:1,
-    btnDisplay: "PLOT ON GRAPH",
-    btnFontSize: 10,
-    btnFontColor: "black",
-    btnFontWeight: "bold"
-  }
 
-  let mouseDown = () => console.log("clicked");
-  return flexButton("plotButton", buttonStyle, mouseDown)
-}
 function instructionText() {
   return (
     <div>
@@ -462,16 +463,7 @@ function App() {
   const [npvRan, setNpvRan] = React.useState(0);
   calcData.testVar = npvRan;
   //console.log( "irr " + findIRR([100], 100));
-  let zeroCashInputStyle = {
 
-    position: "absolute",
-    background: "none",
-    width: "80%",
-    height: "22%",
-    fontSize: ".7vw",
-    border: "none",
-    color: styles.negativeColor
-  }
   function handleCashFlowChange() {
     findNPV(calcData.cashFlows, calcData.r, calcData.initialInvest);
     calcData.npvSnap = [];
@@ -507,26 +499,7 @@ function App() {
   }
 
 
-  // function dollSymbol(value, color) {
-  //   let numSize = .6; 
-  //   let numX = "39%";
-  //   let numY = "86%";
-  //   if (value > 9) {
-  //     numSize= .5;
-  //     numX = "31%"
-  //     numY = "85%"
-  //   }
 
-  //   return(
-
-  //     <svg style={{position: "absolute", background: "none"}} height="2.6vw" width="1.5vw" >
-  //       <text style={{fontSize: "2.2vw", fontWeight: "400", fill: color}} x="4%" y="80%">$</text>
-  //       <circle style={{fill: color}} cx="52%" cy="78%" r="18%"/>
-  //       <text style={{fontSize: numSize + "vw", fontWeight: "700", fill: styles.innerCashBoxColor}} x={numX} y={numY}>{value}</text>
-  //     </svg>
-
-  //   ) 
-  // }
   function snapNPVBtn() {
     return (<Button style={{ position: "relative", left: "2vw", width: "10vw", fontSize: "1vw", background: styles.gray, color: styles.lightCanvasColor, fontFamily: 'Fira Code', padding: 0, height: "2vw", borderRadius: ".2vw" }} variant="contained" onClick={() => { handleNPVSnap() }}  >PLOT ON GRAPH</Button>)
     //return (<button style={snapNPVBtnStyle} name="npvsnap" onClick ={ () => {calcData.npvSnap.push({x: calcData.r, y: calcData.theNPV }); calcData.snapGraphX++; setNpvRan(npvRan + 1); }}>FIND NPV</button>  )
@@ -536,6 +509,27 @@ function App() {
       calcData.npvSnap.unshift([calcData.r, calcData.theNPV]);
       setNpvRan(npvRan + 1);
     }
+  }
+
+  function plotButton() {
+    let buttonStyle = {
+      canvasWidth: "70%", 
+      canvasHeight: "15%", 
+      canvasPadLeft:"15%",
+      canvasPadTop:"60%",
+      btnColor: styles.gray, 
+      btnStrokeColor: "none", 
+      btnStrokeWidth: 1, 
+      btnRadius: 2,
+      btnDisplay: "PLOT ON GRAPH",
+      btnFontSize: 10,
+      btnFontColor: styles.lightCanvasColor,
+      btnFontWeight: "medium",
+      btnTextRange: [9, 14]
+    }
+  
+    let mouseDown = () => handleNPVSnap();
+    return FlexButton("plotButton", buttonStyle, mouseDown)
   }
 
   // function logNPV() {
@@ -555,9 +549,19 @@ function App() {
   
 
   // });
+  let zeroCashInputStyle = {
+
+    position: "absolute",
+    background: "none",
+    width: "80%",
+    height: "22%",
+    fontSize: ".7vw",
+    border: "none",
+    color: styles.positiveColor
+  }
 
   function CashFlowContents() {
-    let dollColor = styles.negativeColor;
+    let dollColor = styles.positiveColor;
 
 
     if (calcData.initialInvest === "") {
@@ -565,12 +569,13 @@ function App() {
     }
     else if (calcData.initialInvest >= 0 && calcData.initialInvest != "") {
       zeroCashInputStyle.fontSize = "2vw";
-      zeroCashInputStyle.color = styles.negativeColor;
+      zeroCashInputStyle.color = styles.positiveColor;
+
     }
     else if (calcData.initialInvest < 0) {
       zeroCashInputStyle.fontSize = "2vw";
-      zeroCashInputStyle.color = styles.positiveColor;
-      dollColor = styles.positiveColor;
+      zeroCashInputStyle.color = styles.negativeColor;
+      dollColor = styles.negativeColor;
     }
     let contents = [];
 
@@ -578,7 +583,7 @@ function App() {
       <div key={"initialentry"}>
         <div style={{ position: "absolute", left: "2%", bottom: "100%" }}>{dollSymbol(0, dollColor)}</div>
         <div style={negInitialInvStyle}>
-          <input style={zeroCashInputStyle} placeholder="<Enter Initial Investment Here>" key={"inINVhold"} type="text" name={"initialInv"} onChange={(event) => { calcData.initialInvest = event.target.value; handleCashFlowChange() }} />
+          <input style={zeroCashInputStyle} placeholder="<Enter Initial Investment Here>" key={"inINVhold"} type="text" name={"initialInv"} onChange={(event) => { calcData.initialInvest = parseFloat(event.target.value); handleCashFlowChange() }} />
         </div>
         <div style={lineBreak} />
       </div>
@@ -606,7 +611,7 @@ function App() {
             <div style={cashContents} >
               {minusButton(value)}
               {dollSymbol(parseInt(value) + 1, styles.positiveColor)}
-              <input style={cashInputStyle} key={"cashflow" + value} value={calcData.cashFlows[value]} type="text" name={value + "cashFlow"} onChange={(event) => { calcData.cashFlows[value] = event.target.value; handleCashFlowChange() }} />
+              <input style={cashInputStyle} key={"cashflow" + value} type="text" name={value + "cashFlow"} onChange={(event) => { calcData.cashFlows[value] = event.target.value; handleCashFlowChange() }} />
             </div>
             <div style={lineBreak} />
           </div>
@@ -647,12 +652,12 @@ function App() {
         <Sketch />
       </div>
 
-      <div style={NpvStatBox}>{}
+      <div style={NpvStatBox}>{plotButton()}
         <p style={header1}>NET PRESENT VALUE</p>
         <p style={NPVHeader}>{calcData.theNPV}</p>
         <p style={header1}>AVG NPV PER YEAR</p>
         <p style={NPVHeader}>{calcData.avgNpvYr}</p>
-        <div style={snapButtonPos}>{snapNPVBtn()}</div>
+
       </div>
 
       <div style={graphBox}>
@@ -679,7 +684,7 @@ function App() {
     let npv = null;
     //reset modded cash flows
     calcData.modCashFlows = [];
-    calcData.modCashFlows.push(calcData.initialInvest * -1);
+    calcData.modCashFlows.push(calcData.initialInvest);
     for (let flow in cashFlows) {
       let powerOf = parseInt(flow) + 1;
       let discountedFlow = cashFlows[flow] / Math.pow(1 + rDec, powerOf);
@@ -687,7 +692,9 @@ function App() {
       npv += discountedFlow;
     }
 
-    npvOut = Math.round((npv - calcData.initialInvest) * 100) / 100;
+    npvOut = Math.round((npv + calcData.initialInvest) * 100) / 100;
+    console.log(npv)
+    console.log(calcData.initialInvest)
     calcData.avgNpvYr = (npvOut / cashFlows.length).toFixed(2);
     calcData.theNPV = npvOut.toFixed(2);
 
