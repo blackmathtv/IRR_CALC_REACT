@@ -502,7 +502,6 @@ export function drawCanvas(key, styles, Sketch) {
 }
 
 export function LineMarkGraph(data, styles) {
-
     let defaults = {
         canvasWidth: "40vw",
         canvasHeight: "40vw",
@@ -527,8 +526,6 @@ export function LineMarkGraph(data, styles) {
         background: "none",
     }
 
-
-
     //load default data if none present
     if (!data) {
         data = {
@@ -542,8 +539,6 @@ export function LineMarkGraph(data, styles) {
         styles = defaults;
     }
     //apply canvas size in styles to global canvas
-
-
 
     let Paths = [];
     let plots = [];
@@ -569,7 +564,71 @@ export function LineMarkGraph(data, styles) {
     return (
       canvas
     )
+}
+
+export function SliderGraph(data, styles) {
+    let defaults = {
+        canvasWidth: "40vw",
+        canvasHeight: "40vw",
+        canvasPadLeft: "1vw",
+        canvasPadTop: "1vw",
+        lineSize: .2,
+        fontSize: 2,
+        fontColor: "#7BA7F0",
+        axisColor: "#7BA7F0",
+        axisLineSize: .2,
+        xTicks: 4,
+        yTicks: 4,
+        tickColor: "#E8E8E8	",
+        tickLineSize: .1,
+        clickPointColor: "#C18FE4",
+        pointSize: 1,
+        selectedPointSize: 2,
+        xName: "X-axis",
+        yName: "Y-axis",
+        zeroLineColor: "#FFAAAA",
+        zeroLineSize: .3,
+        background: "none",
+    }
+
+    //load default data if none present
+    if (!data) {
+        data = {
+            "#75B8A0": [[-50, 0], [100, 200], [140, -10], [60, 20], [90, 90]],
+            "#DCDCAA": [[-25, 160], [115, 91]]
+        };
+    }
+
+    if (!styles) {
+        //styles = defaults;
+        styles = defaults;
+    }
+    //apply canvas size in styles to global canvas
+
+    let Paths = [];
+    let plots = [];
+
+    let combinedData = sortXYArray(data, 80, 80);        
+    let sortedData = combinedData.sortedData;
+    for (let set in sortedData) {
+
+        let Path = getPathSVG("graphPath" + set, styles, sortedData[set].drawArray, sortedData[set].color, styles.lineSize);
+        Paths.push(Path);
+
+
+    }
+
+    let plot = GraphPoints("pointsarray", sortedData, styles);
+    plots.push(plot);
+    let XAxis = getXAxisSVG(combinedData, styles);
+    let YAxis = getYAxisSVG(combinedData, styles);
+    let zeroLine = getZeroLine(combinedData, styles);
     
+    let displaySVG = getValueDisplay(combinedData, styles);
+    let canvas = drawCanvas("LineMarkCanvas", styles, [zeroLine,XAxis,YAxis,Paths,plots,displaySVG] );
+    return (
+      canvas
+    )
 }
 
 export function FlexButton(key, styles, mouseDown, mouseHover, mouseExit) {

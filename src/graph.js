@@ -39,12 +39,18 @@ function Graph()  {
   
   }
 
- 
+  
+  // let calcInput = [[0,0]];
+  // if (calcData.npvSnap != 0) {
+  //   calcInput = calcData.npvSnap
+  // }
+  
   let calcInput = [[0,0]];
-  if (calcData.npvSnap != 0) {
-    calcInput = calcData.npvSnap
-  }
 
+  if (calcData.allNpvPoints != 0) {
+    
+    calcInput = calcData.allNpvPoints;
+  }
 
 let lineColor = styles.gray
   let data = {

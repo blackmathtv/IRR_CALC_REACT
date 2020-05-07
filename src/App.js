@@ -53,7 +53,8 @@ export let calcData = {
   testVar: 0,
   irr: null,
   discountFactor: .67,
-  avgNpvYr: 0
+  avgNpvYr: 0,
+  allNpvPoints: []
 };
 export let styles = {
   canvasWidth: canvasWidth,
@@ -141,16 +142,16 @@ const cashInputStyle = {
   color: styles.positiveColor
 }
 
-const negCashInputStyle = {
-  position: "absolute",
-  background: "none",
-  width: "57%",
-  height: "22%",
-  left: "27%",
-  fontSize: "1.8vw",
-  border: "none",
-  color: styles.negativeColor
-}
+// const negCashInputStyle = {
+//   position: "absolute",
+//   background: "none",
+//   width: "57%",
+//   height: "22%",
+//   left: "27%",
+//   fontSize: "1.8vw",
+//   border: "none",
+//   color: styles.negativeColor
+// }
 const cashBottom = {
   position: "absolute",
   top: "88%",
@@ -465,6 +466,21 @@ function App() {
   //console.log( "irr " + findIRR([100], 100));
 
   function handleCashFlowChange() {
+    calcData.allNpvPoints = [];
+    //find the npv for every point between 1 and 100
+    for (let i = 0; i <= 100; i ++) {
+      let npvOut = null;
+      let rDec = i / 100;
+      let npv = null;
+      for (let flow in calcData.cashFlows) {
+        let powerOf = parseInt(flow) + 1;
+        let discountedFlow = calcData.cashFlows[flow] / Math.pow(1 + rDec, powerOf);
+        npv += discountedFlow;
+      } 
+      npvOut = Math.round((npv + calcData.initialInvest) * 100) / 100;
+      calcData.allNpvPoints.push([i, npvOut]);
+    }
+
     findNPV(calcData.cashFlows, calcData.r, calcData.initialInvest);
     calcData.npvSnap = [];
     loggedNPVs = [];
@@ -592,31 +608,31 @@ function App() {
 
 
     for (let value in calcData.cashFlows) {
-      if (calcData.cashFlows[value] < 0) {
-        contents.push(
-          <div key={"cashflow" +value}>
-            <div style={negCashContents}>
-              {minusButton(value)}
-              {dollSymbol(parseInt(value) + 1, styles.negativeColor)}
-              <input style={negCashInputStyle} key={"cashflow" + value} value={calcData.cashFlows[value]} type="text" name={value + "cashFlow"} onChange={(event) => { calcData.cashFlows[value] = event.target.value; handleCashFlowChange() }} />
-            </div>
-            <div style={lineBreak} />
-          </div>
-        )
+      let color = styles.positiveColor;
 
+      if (calcData.cashFlows[value] < 0) {
+        color = styles.negativeColor;
       }
-      else {
-        contents.push(
-          <div key={"cashflowneg" + value}>
-            <div style={cashContents} >
-              {minusButton(value)}
-              {dollSymbol(parseInt(value) + 1, styles.positiveColor)}
-              <input style={cashInputStyle} key={"cashflow" + value} type="text" name={value + "cashFlow"} onChange={(event) => { calcData.cashFlows[value] = event.target.value; handleCashFlowChange() }} />
-            </div>
-            <div style={lineBreak} />
+      contents.push(
+        <div key={"cashflow" +value}>
+          <div style={negCashContents}>
+            {minusButton(value)}
+            {dollSymbol(parseInt(value) + 1, color)}
+            <input style={{
+                position: "absolute",
+                background: "none",
+                width: "57%",
+                height: "22%",
+                left: "27%",
+                fontSize: "1.8vw",
+                border: "none",
+                color: color
+            }} key={"cashflow" + value} value={calcData.cashFlows[value]} type="text" name={value + "cashFlow"} onChange={(event) => { calcData.cashFlows[value] = event.target.value; handleCashFlowChange() }} />
           </div>
-        )
-      }
+          <div style={lineBreak} />
+        </div>
+      )
+
     }
 
     return (contents)
