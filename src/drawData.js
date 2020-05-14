@@ -59,8 +59,8 @@ function GetDrawData () {
         }
     }
     drawData.values.allBarValues.sort((a,b) => b-a);
-    drawData.values.viewHeightMultiplier = 92/drawData.values.allBarValues[0];
-
+    drawData.values.viewHeightMultiplier = 110/drawData.values.allBarValues[0];
+    // drawData.values.viewHeightMultiplier = 92/drawData.values.allBarValues[0];
     
     
     for (var value in calcData.modCashFlows) {

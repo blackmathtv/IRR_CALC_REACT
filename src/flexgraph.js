@@ -168,8 +168,8 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
         yLimit: yLimit,
         xMin: 0,
         xMax: 100,
-        yMin: -1,
-        yMax: 1,
+        yMin: null,
+        yMax: null,
         padLeft: 0,
         padTop: 0,
         xMultiplier: 1,
@@ -186,8 +186,8 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
             yAscending: data[set].slice(),
             xMin: 0,
             xMax: 100,
-            yMin: -1,
-            yMax: 1,
+            yMin: null,
+            yMax: null,
             xLimit: xLimit,
             yLimit: yLimit,
             padLeft: 0,
@@ -247,13 +247,14 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
 
         sortedData.xDiff = sortedData.xMax - sortedData.xMin;
         sortedData.yDiff = sortedData.yMax - sortedData.yMin;
+ 
 
  
         if (sortedData.xDiff !== 0) {
             sortedData.xMultiplier = combinedData.xLimit / sortedData.xDiff;
         }
         else {
-            sortedData.xMultiplier = 1
+            sortedData.xMultiplier = 1;
         }
 
         if (sortedData.yDiff !== 0) {
@@ -273,6 +274,8 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
     combinedData.yDiff = combinedData.yMax - combinedData.yMin;
 
     //if there is no range differnece, make one
+    // console.log("ydiff " + combinedData.yDiff);
+    // console.log("ymin " + combinedData.yMin + " yMax " + combinedData.yMax)
     if (combinedData.xDiff < 10) {
         combinedData.xMax += 5;
         combinedData.xMin -= 5;
@@ -284,6 +287,9 @@ export function sortXYArray(data, xLimit, yLimit, drawFree, range) {
         combinedData.yMax += 5;
         combinedData.yDiff += 10;
     }
+    // console.log("after diff")
+    // console.log("ydiff " + combinedData.yDiff);
+    // console.log("ymin " + combinedData.yMin + " yMax " + combinedData.yMax)
 
   
         combinedData.xMultiplier = combinedData.xLimit / combinedData.xDiff;
@@ -373,8 +379,15 @@ export function getYAxisSVG(sortedData, styles) {
     let rulerStep = diff(sortedData.yMin, sortedData.yMax) / styles.yTicks; //the value offset 
     let rulerPosition = 100 - sortedData.padTop;
     for (let i = 0; i <= styles.yTicks; i++) {
-        //push ruler values to text array spaced out evenly
-        textArray.push(getTextSVG("yrulervalue" + i, Math.round(sortedData.yMin + (rulerStep * i)), [(sortedData.padLeft / 2) + "%", rulerPosition - (rulerOffset * i) + "%"], styles.fontSize, styles.fontColor));
+        //push ruler values to text array spaced out evenly, if there is a small differrence, round to the nearest 10th
+        if (sortedData.yDiff > 50) {
+            textArray.push(getTextSVG("yrulervalue" + i, Math.round(sortedData.yMin + (rulerStep * i)), [(sortedData.padLeft / 2) + "%", rulerPosition - (rulerOffset * i) + "%"], styles.fontSize, styles.fontColor));
+        }
+        else{
+            textArray.push(getTextSVG("yrulervalue" + i, rndNearTenth(sortedData.yMin + (rulerStep * i)), [(sortedData.padLeft / 2) + "%", rulerPosition - (rulerOffset * i) + "%"], styles.fontSize, styles.fontColor));
+
+        }
+
         if (i >= 1) {
             tickArray.push(getPathSVG("ytickline" + i, styles, [[sortedData.padLeft, rulerPosition - (rulerOffset * i)], [100 - sortedData.padLeft, rulerPosition - (rulerOffset * i)]], styles.tickColor, styles.tickLineSize, 0, 1));
         }
@@ -395,7 +408,9 @@ export function getYAxisSVG(sortedData, styles) {
 export function getZeroLine(sortedData, styles) {
 
     if (sortedData.yMin < 0 && sortedData.yMax > 0) {
+        
         let y = sortedData.yLimit - ((0 - sortedData.yMin) * sortedData.yMultiplier) + sortedData.padTop;
+   
         let range = [[], []];
         range = [[sortedData.padLeft, y], [100 - sortedData.padLeft, y]];
         let path = getPathSVG("zeroline", styles, range, styles.zeroLineColor, styles.zeroLineSize, false, 1);
@@ -542,24 +557,33 @@ export function LineMarkGraph(data, styles) {
 
     let Paths = [];
     let plots = [];
+    let XAxis = [];
+    let YAxis = [];
+    let zeroLine = [];
+    let displaySVG = [];
 
     let combinedData = sortXYArray(data, 80, 80);
     let sortedData = combinedData.sortedData;
-    for (let set in sortedData) {
-
-        let Path = getPathSVG("graphPath" + set, styles, sortedData[set].drawArray, sortedData[set].color, styles.lineSize);
-        Paths.push(Path);
-
-
+    if (styles.drawLines !== "false") {
+        for (let set in sortedData) {
+            let Path = getPathSVG("graphPath" + set, styles, sortedData[set].drawArray, sortedData[set].color, styles.lineSize);
+            Paths.push(Path);
+        }
+    }
+    if (styles.drawPoints !== "false") {
+        let plot = GraphPoints("pointsarray", sortedData, styles);
+        plots.push(plot);
     }
 
-    let plot = GraphPoints("pointsarray", sortedData, styles);
-    plots.push(plot);
-    let XAxis = getXAxisSVG(combinedData, styles);
-    let YAxis = getYAxisSVG(combinedData, styles);
-    let zeroLine = getZeroLine(combinedData, styles);
+    XAxis = getXAxisSVG(combinedData, styles);
+    YAxis = getYAxisSVG(combinedData, styles);
+    if (styles.drawZeroLine !== "false") {
+        zeroLine = getZeroLine(combinedData, styles);
+    }
     
-    let displaySVG = getValueDisplay(combinedData, styles);
+    if (styles.drawDisplay !== "false") {
+        displaySVG = getValueDisplay(combinedData, styles);
+    }
     let canvas = drawCanvas("LineMarkCanvas", styles, [zeroLine,XAxis,YAxis,Paths,plots,displaySVG] );
     return (
       canvas

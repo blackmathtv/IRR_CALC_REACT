@@ -47,7 +47,7 @@ function Sketch(){
       let key = value;
       if (drawData.values.drawBarHeights[value] >= 0) {  
           drawData.rectangles.bars.push(getRectangleSVG(key, [drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value]], drawData.values.barWidth, drawData.values.drawBarHeights[value], styles.positiveColor));
-          drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [drawData.values.barPosX - drawData.values.glassPad, 2], drawData.values.barWidth + drawData.values.doubleGlassPad, 96, "none", styles.gray, .3, 1));
+          drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [drawData.values.barPosX - drawData.values.glassPad, -16], drawData.values.barWidth + drawData.values.doubleGlassPad, 114, "none", styles.gray, .3, 1));
           //drawData.points.wavePoints.push([drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value]]);
           drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value]]);         
           //drawData.points.negWavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
@@ -58,7 +58,7 @@ function Sketch(){
       }
       else if (drawData.values.drawBarHeights[value] < 0) {
           drawData.rectangles.bars.push(getRectangleSVG(key, [drawData.values.barPosX, drawData.values.barCanvas - (drawData.values.drawBarHeights[value] * -1)], drawData.values.barWidth, (drawData.values.drawBarHeights[value] * -1), styles.negativeColor));
-          drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [drawData.values.barPosX - drawData.values.glassPad, 2], drawData.values.barWidth + drawData.values.doubleGlassPad, 96, "none", styles.gray, .3, 1));
+          drawData.rectangles.glass.push(getRectangleSVG("glass" + key, [drawData.values.barPosX - drawData.values.glassPad, -16], drawData.values.barWidth + drawData.values.doubleGlassPad, 114, "none", styles.gray, .3, 1));
 
           //drawData.points.negWavePoints.push([drawData.values.barPosX, drawData.values.barCanvas - drawData.values.drawBarHeights[value] * -1]);
           drawData.points.negWavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value] * -1]);
@@ -96,7 +96,7 @@ function Sketch(){
           top: "10%",
           left: "5%",
           width: "90%", 
-          height: "80%"
+          height: "90%"
           }}
           viewBox="0 0 200 100"
         >{drawData.rectangles.bars}{drawData.rectangles.modFlows}{drawData.rectangles.glass}{path}

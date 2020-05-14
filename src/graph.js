@@ -11,12 +11,13 @@ import {LineMarkGraph} from './flexgraph.js'
 
 function Graph()  {
   let graphStyles = {
-    canvasWidth: "36vw",
-    canvasHeight: "15vw",
-    canvasPadLeft: "0",
+    canvasWidth: "43vw",
+    canvasHeight: "17vw",
+    canvasPadLeft: "2vw",
     canvasPadTop: "1vw",
+    
     lineSize: .2,
-    fontSize: 2,
+    fontSize: 1.5,
     fontColor: styles.gray,
     axisColor: styles.canvasColor,
     axisLineSize: .3,
@@ -27,17 +28,40 @@ function Graph()  {
     clickPointColor: "#47C4C1",
     pointSize: 1,
     selectedPointSize: 2,
-    xName: "DISCOUNT RATE",
-    yName: "NPV",
+
     zeroLineColor: "#47C4C1",
     zeroLineSize: .3,
     background: "none",
-    displayInit: "DISCOUNT RATE: 0 NPV: 0",
-    displayFontSize: 2,
-    displayFontWeight: "bold",
-    displayColor: "black"
-  
+    drawDisplay: "false",
+
+    drawPoints: "false",
+    drawLines: "true"
   }
+
+  let markStyles = {
+    canvasWidth: "43vw",
+    canvasHeight: "17vw",
+    canvasPadLeft: "2vw",
+    canvasPadTop: "1vw",
+ 
+    fontSize: 1.5,
+    fontColor: styles.gray,
+    axisColor: "none",
+    xName: "RATE OF RETURN (%)",
+    yName: "NPV ($)",
+    tickColor: "",
+    tickLineSize: .1,
+    clickPointColor: "#47C4C1",
+    pointSize: 1,
+    selectedPointSize: 2,
+    drawZeroLine: "false",
+    drawAxis: "false",
+
+    background: "none",
+    drawPoints: "true",
+    drawLines: "false"
+  }
+
 
   
   // let calcInput = [[0,0]];
@@ -54,17 +78,24 @@ function Graph()  {
 
 let lineColor = styles.gray
   let data = {
-    "#C2C2C2": calcInput
+    "#47C4C1": calcInput
   };
 
 
 // let styles = [];
 let graph = LineMarkGraph(data, graphStyles);
-    
+let mark = LineMarkGraph(calcData.npvSnap, markStyles);
+
+
 //<FlexibleXYPlot margin={{left: 0, right: 0, top: 0, bottom: 0}}>    
     return (
-      <div  >
-       {graph}
+      <div>
+        <div>
+          {graph}
+        </div>
+        <div>
+          {mark}
+        </div>
       </div>
     );
   
