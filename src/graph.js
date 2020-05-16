@@ -19,6 +19,7 @@ function Graph()  {
     labelColor: "none",
     lineSize: .2,
     fontSize: 1.5,
+    displayFontSize: 1.2,
     fontColor: styles.gray,
     axisColor: styles.canvasColor,
     axisLineSize: .3,
@@ -31,10 +32,15 @@ function Graph()  {
     selectedPointSize: 1.5,
     xName: "RATE OF RETURN (%)",
     yName: "NPV ($)",
+    popXDisplay: "ROR",
+    popYDisplay: "NPV",
     markerLineColor: styles.darkGray,
     markerLineSize: .2,
-    background: "none",
-    drawDisplay: "false",
+    background: styles.lightCanvasColor,
+    drawDisplay: "true",
+    xSymbol: "%",
+    ySymbol: "",
+
 
     drawPoints: "false",
     drawLines: "true",
@@ -73,7 +79,7 @@ let lineColor = styles.gray
     "#ADDCE3": npvSnap
   };
 
-  console.log(data);
+
 
 
 // let styles = [];

@@ -154,6 +154,10 @@ export function getPathSVG(key, styles, points, color, strokeWidth, smoothing, d
 
 export function sortXYArray(data, styles, xLimit, yLimit, drawFree, range) {
 
+    // globalStyles = {
+    //     clickedPoint: null,
+    // }
+
     if (!drawFree) {
         drawFree = false;
     }
@@ -335,7 +339,7 @@ export function sortXYArray(data, styles, xLimit, yLimit, drawFree, range) {
             set += 1;
         }
     }
-    console.log(combinedData);
+   
     return (combinedData);
 
 }
@@ -448,16 +452,21 @@ export function getmarkerLine(sortedData, styles) {
 
 export function GraphPoints(key, sortedData, styles) {
     let circleArray = [];
+    let popBox = []
+
     const [selectedPoint, setSelectedPoint] = React.useState({ value: [], draw: []});
     const [hovered, setHovered] = React.useState([]);
     //const [popTopLeft, setPopTopLeft] = React.useState([]);
-
-    
+   
 
     function handlePointClick(xVal, yVal, xDraw, yDraw) {
         display = styles.xName + ": " + xVal + " " + styles.yName + ": " + yVal;
         let point = {value: [xVal, yVal], draw: [xDraw, yDraw]}
         globalStyles.clickedPoint = point;
+        // if (point.draw[0] === selectedPoint.draw[0]) {
+        //     point = { value: [], draw: []}
+        //     globalStyles.clickedPoint = null;
+        // }
         setSelectedPoint(point);
        
     }
@@ -489,9 +498,12 @@ export function GraphPoints(key, sortedData, styles) {
                 }
 
 
-                let mouseOver = () => setHovered([set, pair]);
-                let mouseExit = () => setHovered([]);
-                let mouseDown = () => { handlePointClick(xVal, yVal, xDraw, yDraw) };
+                // let mouseOver = () => setHovered([set, pair]);
+                let mouseOver = () => { handlePointClick(xVal, yVal, xDraw, yDraw) };
+                // let mouseExit = () => setHovered([]);
+                let mouseExit = () => {setSelectedPoint({ value: [], draw: []}); globalStyles.clickedPoint = null};
+                // let mouseDown = () => { handlePointClick(xVal, yVal, xDraw, yDraw) };
+                let mouseDown = () => {};
 
                 circleArray.push(GetCircleSvg(key + pair + set, styles, color, "none", "none", xDraw, yDraw, radius, radius, mouseDown, mouseOver, mouseExit));
             }
@@ -501,7 +513,7 @@ export function GraphPoints(key, sortedData, styles) {
     }
 
 
-    return (circleArray);
+    return (<svg>{circleArray}{popBox}</svg>);
 }
 export function getBoxAxis(sortedData, styles) {
     let boxStyle = {
@@ -532,7 +544,7 @@ export function drawCanvas(key, styles, Sketch) {
 
     return (
         <div key={key} style={{ position: "absolute", top: styles.canvasPadTop, left: styles.canvasPadLeft, width: styles.canvasWidth, height: styles.canvasHeight }}>
-            <svg style={{ background: styles.canvasColor }} viewBox={ViewBox}>
+            <svg key = "canvasBox" style={{ background: styles.canvasColor }} viewBox={ViewBox}>
                 {Sketch}
             </svg>
         </div>
@@ -540,6 +552,7 @@ export function drawCanvas(key, styles, Sketch) {
 }
 
 export function LineMarkGraph(data, styles) {
+
     let defaults = {
         canvasWidth: "40vw",
         canvasHeight: "40vw",
@@ -776,34 +789,94 @@ export function DrawShapesGraph(data, styles) {
 
 }
 
-function GetDisplayPop(styles) {
+function GetDisplayPop(styles, selectedPoint) {
     let displayPop = {};
     let topLeftPoint = [];
     let pointy = [];
+    let text = [];
+    let xVal = null;
+    let yVal = null;
+    let xHeaderFontSize = styles.displayFontSize;
+    let yHeaderFontSize = styles.displayFontSize;
+    let xValueFontSize = xHeaderFontSize * 1.25;
+    let yValueFontSize = yHeaderFontSize * 1.25;
+    let xHeaderXPosition = null;
+    let yHeaderXPosition = null;
+    let xValueXPosition = null;
+    let yValueXPosition = null; 
+    let flip = false;
     if (globalStyles.clickedPoint) {
+        
         topLeftPoint = [globalStyles.clickedPoint.draw[0] - 6, globalStyles.clickedPoint.draw[1] -29];
+        //flip the box when point is near the top of the graph
+        if (topLeftPoint[1] <= 9) {
+            topLeftPoint[1] += 40
+            flip = true;
+        }
         displayPop = {
-            topLeftPoint: topLeftPoint,
+            topLeftPoint: [topLeftPoint[0] + 2, topLeftPoint[1]],
             fill: styles.clickPointColor,
-            width: 12,
+            width: 8,
             height: 18,
             radius: .5
         }
-        pointy = getPathSVG(
-            "popbox", styles, [
-            [topLeftPoint[0] + 4.5, topLeftPoint[1] + displayPop.height -.1], 
-            [topLeftPoint[0] + 7.5, topLeftPoint[1] + displayPop.height -.1], 
-            [topLeftPoint[0] + 6, topLeftPoint[1] + displayPop.height + 4]
-        ], "none", "0vw", 0, 0, styles.clickPointColor)
+        //flip the triangle when point is near top of the graph
+        if (flip === false) {
+            pointy = getPathSVG(
+                "popbox", styles, [
+                [topLeftPoint[0] + 4.5, topLeftPoint[1] + displayPop.height -.1], 
+                [topLeftPoint[0] + 7.5, topLeftPoint[1] + displayPop.height -.1], 
+                [topLeftPoint[0] + 6, topLeftPoint[1] + displayPop.height + 4]
+            ], "none", "0vw", 0, 0, styles.clickPointColor)
+        }
+        else {
+            pointy = getPathSVG(
+                "popbox", styles, [
+                [topLeftPoint[0] + 4.5, topLeftPoint[1] + .1], 
+                [topLeftPoint[0] + 7.5, topLeftPoint[1] + .1], 
+                [topLeftPoint[0] + 6, topLeftPoint[1] - 4]
+            ], "none", "0vw", 0, 0, styles.clickPointColor)
+        }
+
+        xVal = globalStyles.clickedPoint.value[0].toString() + styles.xSymbol;
+        if (xVal.length > 8){
+            xValueFontSize = 12/xVal.length;
+         }
+      
+        yVal = commaFormat(globalStyles.clickedPoint.value[1].toString()) + styles.ySymbol;
+        if (yVal.length > 8){
+           yValueFontSize = 12/yVal.length;
+        }
+        console.log(xValueFontSize);
+        
+    
+        //this calculates the center position of the text based on the font size and length of input
+        xHeaderXPosition = (topLeftPoint[0] + 5.75) - ((xHeaderFontSize/3.11) * (styles.popXDisplay.toString().length -1))  + "%";
+        yHeaderXPosition = (topLeftPoint[0] + 5.75) - ((yHeaderFontSize/3.11) * (styles.popYDisplay.toString().length -1))  + "%";
+
+        xValueXPosition = (topLeftPoint[0] + 5.75) - ((xValueFontSize/3.11) * (xVal.toString().length -1))  + "%";
+        yValueXPosition = (topLeftPoint[0] + 5.75) - ((yValueFontSize/3.11) * (yVal.toString().length -1))  + "%";
+
+        text.push(getTextSVG("Xname", styles.popXDisplay, [xHeaderXPosition, topLeftPoint[1] + 4 + "%"], xHeaderFontSize, styles.background, styles.displayFontWeight, ))
+        text.push(getTextSVG("Xvalue",  xVal, [xValueXPosition, topLeftPoint[1] + 8 + "%"], xValueFontSize, styles.background, "bold", ))
+        text.push(getTextSVG("yname", styles.popYDisplay, [yHeaderXPosition, topLeftPoint[1] + 12 + "%"], yHeaderFontSize, styles.background, styles.displayFontWeight, ))
+        text.push(getTextSVG("yvalue",   yVal, [yValueXPosition, topLeftPoint[1] + 16 + "%"], yValueFontSize, styles.background, "bold", ))
+
+        
+
+        // text.push(getTextSVG("Yname", styles.popYDisplay + " " + globalStyles.clickedPoint.value[1] + styles.ySymbol, [topLeftPoint[0] + 1 + "%", topLeftPoint[1] + 12 + "%"], styles.displayFontSize, styles.background, styles.displayFontWeight, ))
 
     }
 
     // console.log(pointy);
     if (displayPop.topLeftPoint) {
         return (
-            <svg>
+            <svg key= "displayPOP">
+                    
                  {getRectangleSVG("displaything", displayPop)}
                  {pointy}
+                 {text}
+                 
             </svg>
             
          
