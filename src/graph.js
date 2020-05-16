@@ -4,6 +4,7 @@ import '../node_modules/react-vis/dist/style.css';
 import {styles} from './App.js';
 import {calcData} from "./App.js";
 import {LineMarkGraph} from './flexgraph.js'
+import { calc } from 'popmotion';
 
 
 
@@ -15,7 +16,7 @@ function Graph()  {
     canvasHeight: "17vw",
     canvasPadLeft: "2vw",
     canvasPadTop: "1vw",
-    
+    labelColor: "none",
     lineSize: .2,
     fontSize: 1.5,
     fontColor: styles.gray,
@@ -27,40 +28,21 @@ function Graph()  {
     tickLineSize: .1,
     clickPointColor: "#47C4C1",
     pointSize: 1,
-    selectedPointSize: 2,
-
-    zeroLineColor: "#47C4C1",
-    zeroLineSize: .3,
+    selectedPointSize: 1.5,
+    xName: "RATE OF RETURN (%)",
+    yName: "NPV ($)",
+    markerLineColor: styles.darkGray,
+    markerLineSize: .2,
     background: "none",
     drawDisplay: "false",
 
     drawPoints: "false",
-    drawLines: "true"
+    drawLines: "true",
+    type: ["Line", "Mark"],
+    // selectedPoint: [calcData.r, calcData.theNPV]
   }
 
-  let markStyles = {
-    canvasWidth: "43vw",
-    canvasHeight: "17vw",
-    canvasPadLeft: "2vw",
-    canvasPadTop: "1vw",
- 
-    fontSize: 1.5,
-    fontColor: styles.gray,
-    axisColor: "none",
-    xName: "RATE OF RETURN (%)",
-    yName: "NPV ($)",
-    tickColor: "",
-    tickLineSize: .1,
-    clickPointColor: "#47C4C1",
-    pointSize: 1,
-    selectedPointSize: 2,
-    drawZeroLine: "false",
-    drawAxis: "false",
 
-    background: "none",
-    drawPoints: "true",
-    drawLines: "false"
-  }
 
 
   
@@ -70,32 +52,42 @@ function Graph()  {
   // }
   
   let calcInput = [[0,0]];
+  let npvSnap = [[0,0]]
 
-  if (calcData.allNpvPoints != 0) {
+
     
-    calcInput = calcData.allNpvPoints;
-  }
+  calcInput = calcData.allNpvPoints;
+
+
+
+    
+  npvSnap = calcData.npvSnap;
+
+
+
+
 
 let lineColor = styles.gray
   let data = {
-    "#47C4C1": calcInput
+    "#47C4C1": calcInput,
+    "#ADDCE3": npvSnap
   };
+
+  console.log(data);
 
 
 // let styles = [];
 let graph = LineMarkGraph(data, graphStyles);
-let mark = LineMarkGraph(calcData.npvSnap, markStyles);
+
 
 
 //<FlexibleXYPlot margin={{left: 0, right: 0, top: 0, bottom: 0}}>    
     return (
       <div>
-        <div>
+                  <div style={{color: styles.darkGray, fontSize: ".7vw", position: "absolute", transform: "rotate(-90deg)", left: "-1%", top: "48%"}}>NPV ($)</div>
+        <div style={{color: styles.darkGray, fontSize: ".7vw", position: "absolute", left: "43%", top: "93%"}}>RATE OF RETURN (%)</div>
           {graph}
-        </div>
-        <div>
-          {mark}
-        </div>
+    
       </div>
     );
   

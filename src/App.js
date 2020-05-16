@@ -13,15 +13,23 @@ export var modCashFlows = [];
 
 
 
-const dollarFormat = new Intl.NumberFormat('en-US', {
+const dollarFormat = (number) => Intl.NumberFormat('en-US', {
   style: 'currency',
   currency: 'USD',
   minimumFractionDigits: 2
-})
+}).format(number);
 
 const commaFormat = (number) => Intl.NumberFormat().format(number);
 var idk = "38843,3992"
-const removeCommas = (num) => parseFloat(num.replace(/,/g, ''))
+function removeCommas(num) {
+
+  if (num) {
+    return parseFloat(num.replace(/,/g, ''));
+  }
+  else {
+    return num;
+  }
+} 
 
 function rndNearTenth(num) {
   return parseFloat((Math.round(num * 100) / 100).toFixed(2));
@@ -33,9 +41,7 @@ const numFormatter = new Intl.NumberFormat('en-US', {
 })
 
 var someNumber = -88233442.57674;
-// console.log(commaFormat(someNumber));
-// console.log(rndNearTenth(939,85.11222))
-// console.log(numFormatter.format(someNumber));
+
 
 let canvasWidth = window.innerWidth * .9;
 let canvasHeight = canvasWidth / 2.32;
@@ -113,7 +119,7 @@ const innerCashBox = {
   position: "absolute",
   top: "8%",
   background: styles.innerCashBoxColor,
-  height: "86%",
+  height: "83%",
   width: "100%",
   overflowY: "scroll",
   overflowX: "auto"
@@ -241,7 +247,7 @@ const DRateText = {
   fontWeight: "bold",
   fontSize: ".8vw",
   left: "1vw",
-  top: "0vw"
+  top: ".8vw"
 }
 const DFactorText = {
   position: "absolute",
@@ -270,7 +276,8 @@ const NpvStatBox = {
   background: styles.lightCanvasColor,
   height: styles.firstRowHeight,
   width: "18.5%",
-  borderRadius: styles.boxRadius
+  borderRadius: styles.boxRadius,
+  overflowX: "auto"
 }
 
 // const innerNpvStatBox = {
@@ -291,11 +298,21 @@ const NPVHeader = {
   fontWeight: "medium",
   fontSize: "1.8vw",
   top: 0,
+  color: styles.lightBlue,
+  textAlign: "center",
+  marginTop: "-.5vw"
+}
+
+
+const avgNPVHeader = {
+
+  position: "relative",
+  fontWeight: "medium",
+  fontSize: "1.2vw",
+  top: 0,
   color: styles.gray,
   textAlign: "center",
-  marginTop: 0
-
-
+  marginTop: "-.5vw"
 }
 // const histListContents = { 
 //   paddingTop: 0,
@@ -455,10 +472,32 @@ const drawArrows = () => {
   let canvas = drawCanvas("arrowcanvas", canvasStyles, [firstArrow, secondArrow]);
   return (canvas);
 }
+    
+function npvResult() {
+  const style = {
+    position: "relative",
+    fontWeight: "medium",
+    fontSize: "2vw",
+    top: 0,
+    color: styles.lightBlue,
+    textAlign: "center",
+    marginTop: "-.5vw"
+  }
+  // let length = parseInt(calcData.theNPV.toString().length);
+  var npvResult = dollarFormat(calcData.theNPV);
+  let npvLength = npvResult.length
+  if (npvLength >= 12) {
+    style.fontSize = 20/npvLength + "vw";
+  }
+  return (
+   <p style={style}>{npvResult}</p> 
+  )
 
+}
 
 
 function App() {
+
 
 
 
@@ -501,14 +540,14 @@ function App() {
 
 
     return (
-      <p style={DRateText}>RATE OF RETURN:{percentBox()}<p style = {{ fontSize: "1.4vw", position: "absolute", top: "-1.8vw", left: "11vw", color: styles.lightBlue}}>%</p></p>
+      <div style={DRateText}>RATE OF RETURN:{percentBox()}<p style = {{ fontSize: "1.4vw", position: "absolute", top: "-2vw", left: "11vw", color: styles.lightBlue}}>%</p></div>
     )
   }
 
 
   function handleCashFlowChange() {
     calcData.allNpvPoints = [];
-    let yearZero = parseFloat(calcData.cashFlows[0]);
+    let yearZero = removeCommas(calcData.cashFlows[0]);
     calcData.initialInvest = yearZero;
     //find the npv for every point between 1 and 100
     for (let i = 0; i <= 100; i++) {
@@ -516,8 +555,9 @@ function App() {
       let rDec = i / 100;
       let npv = null;
       for (let flow = 1; flow < calcData.cashFlows.length; flow++) {
+        let cashFlow = removeCommas(calcData.cashFlows[flow]);
         let powerOf = parseInt(flow) + 1;
-        let discountedFlow = calcData.cashFlows[flow] / Math.pow(1 + rDec, powerOf);
+        let discountedFlow = cashFlow / Math.pow(1 + rDec, powerOf);
         npv += discountedFlow;
       }
       npvOut = Math.round((npv + yearZero) * 100) / 100;
@@ -530,10 +570,11 @@ function App() {
   }
   function minusButton(value) {
     return (
-      <svg height="1.2vw" width="2vw" onClick={() => { calcData.cashFlows.splice(value, 1); handleCashFlowChange() }} >
+      <svg style={{cursor: "pointer", background: styles.canvasColor, position: "absolute", left: "10.8vw", borderRadius: "0vw", marginTop: "0vw"}} height="1.2vw" width="1.2vw" onMouseDown={() => { calcData.cashFlows.splice(value, 1); handleCashFlowChange() }} >
 
-        <circle style={minusButtonStyle} cx="56%" cy="50%" r="32%" />
-        <line style={minusLineStyle} x1="44%" y1="50%" x2="67%" y2="50%" />
+        {/* <circle style={minusButtonStyle} cx="56%" cy="50%" r="32%" /> */}
+        <line stroke={styles.darkGray} strokeWidth=".1vw" x1="30%" y1="70%" x2="70%" y2="30%" />
+        <line stroke={styles.darkGray} strokeWidth=".1vw" x1="70%" y1="70%" x2="30%" y2="30%" />
       </svg>
     )
   }
@@ -572,22 +613,49 @@ function App() {
 
   function plotButton() {
     let buttonStyle = {
-      canvasWidth: "70%",
-      canvasHeight: "15%",
-      canvasPadLeft: "15%",
-      canvasPadTop: "60%",
+      canvasWidth: "13%",
+      canvasHeight: "2.6%",
+      canvasPadLeft: "10.6%",
+      canvasPadTop: "88%",
       btnColor: styles.gray,
       btnStrokeColor: "none",
       btnStrokeWidth: 1,
-      btnRadius: 2,
-      btnDisplay: "PLOT ON GRAPH",
+      btnRadius: 3,
+      btnDisplay: "SHOW POINT ON GRAPH",
+      btnFontSize: 7,
+      btnFontColor: styles.lightCanvasColor,
+      btnFontWeight: "medium",
+      btnTextRange: [9.5, 12.2]
+    }
+
+    let mouseDown = () => {
+      if (calcData.theNPV) {
+        calcData.npvSnap.unshift([Number(calcData.r), Number(calcData.theNPV)]);
+        setNpvRan(npvRan + 1);
+      }
+    };
+    return FlexButton("plotButton", buttonStyle, mouseDown)
+  }
+
+  function addMoreButton() {
+    let buttonStyle = {
+      canvasWidth: "60%",
+      canvasHeight: "12%",
+      canvasPadLeft: "20%",
+      canvasPadTop: "39%",
+     
+      btnColor: styles.gray,
+      btnStrokeColor: "none",
+      btnStrokeWidth: 1,
+      btnRadius: 4,
+      btnDisplay: "ADD MORE",
       btnFontSize: 10,
       btnFontColor: styles.lightCanvasColor,
       btnFontWeight: "medium",
-      btnTextRange: [9, 14]
+      btnTextRange: [25, 13]
     }
 
-    let mouseDown = () => handleNPVSnap();
+    let mouseDown = () => {calcData.cashFlows.push(0); handleCashFlowChange() };
     return FlexButton("plotButton", buttonStyle, mouseDown)
   }
 
@@ -664,7 +732,7 @@ function App() {
             <input style={{
               position: "absolute",
               background: "none",
-              width: "9vw",
+              width: "8vw",
               height: "2.6vw",
               left: "2vw",
               fontSize: "1.8vw",
@@ -674,17 +742,18 @@ function App() {
               value={calcData.cashFlows[value]}
               type="text" name={value + "cashFlow"}
               onChange={(event) => {
-
+                
                 calcData.cashFlows[value] = event.target.value;
                 handleCashFlowChange()
               }} />
-            {/* {minusButton(value)} */}
+            {minusButton(value)}
           </div>
           <div style={lineBreak} />
         </div>
       )
 
     }
+  
 
     return (contents)
   }
@@ -704,8 +773,8 @@ function App() {
 
       <div style={cashFlowBox}><p style={header1}>CASH FLOWS</p>
         <div style={innerCashBox}>{CashFlowContents()}</div>
-        <div style={cashBottom}>{cashFlowPlusBtn()}</div>
-        <p style={cashBtmTxt}>Add another</p>
+        <div style={cashBottom}>{addMoreButton()}</div>
+    
       </div>
 
       <div style={dRateBox}>
@@ -722,16 +791,17 @@ function App() {
 
       <div style={NpvStatBox}>
         <p style={header1}>NET PRESENT VALUE</p>
-        <p style={NPVHeader}>{calcData.theNPV}</p>
+        <div>{npvResult()}</div>
         <p style={header1}>AVG NPV PER PERIOD</p>
-        <p style={NPVHeader}>{calcData.avgNpvYr}</p>
+        <p style={avgNPVHeader}>{dollarFormat(calcData.avgNpvYr)}</p>
 
       </div>
 
       <div style={graphBox}>
+
         {Graph()}
       </div>
-      {/* {plotButton()} */}
+      {plotButton()}
 
 
 
@@ -748,8 +818,8 @@ function App() {
 
 
 
-
-    let yearZero = parseFloat(cashFlows[0]);
+    
+    let yearZero = removeCommas(cashFlows[0]);
 
 
     let npvOut = null;
@@ -760,16 +830,17 @@ function App() {
     calcData.modCashFlows.push(yearZero);
     calcData.initialInvest = yearZero;
     for (let flow = 1; flow < cashFlows.length; flow++) {
-
+      let cashFlow = removeCommas(cashFlows[flow]);
+      
       let powerOf = parseInt(flow) + 1;
-      let discountedFlow = cashFlows[flow] / Math.pow(1 + rDec, powerOf);
+      let discountedFlow = cashFlow / Math.pow(1 + rDec, powerOf);
       calcData.modCashFlows.push(discountedFlow);
       npv += discountedFlow;
     }
 
     npvOut = Math.round((npv + yearZero) * 100) / 100;
 
-    calcData.avgNpvYr = (npvOut / (cashFlows.length + 1)).toFixed(2);
+    calcData.avgNpvYr = (npvOut / (cashFlows.length)).toFixed(2);
     calcData.theNPV = npvOut.toFixed(2);
 
     //return (npvOut);
