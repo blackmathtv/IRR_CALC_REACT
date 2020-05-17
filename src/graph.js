@@ -5,6 +5,7 @@ import {styles} from './App.js';
 import {calcData} from "./App.js";
 import {LineMarkGraph} from './flexgraph.js'
 import { calc } from 'popmotion';
+import { isCompositeComponent } from 'react-dom/test-utils';
 
 
 
@@ -25,7 +26,7 @@ function Graph()  {
     axisLineSize: .3,
     xTicks: 4,
     yTicks: 4,
-    tickColor: "#E8E8E8	",
+    tickColor: "none",
     tickLineSize: .1,
     clickPointColor: "#47C4C1",
     pointSize: 1,
@@ -37,9 +38,10 @@ function Graph()  {
     markerLineColor: styles.darkGray,
     markerLineSize: .2,
     background: styles.lightCanvasColor,
-    drawDisplay: "true",
+    drawDisplay: "false",
     xSymbol: "%",
     ySymbol: "",
+    selectedPoint: calcData.npvSnap[0], 
 
 
     drawPoints: "false",

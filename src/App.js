@@ -5,13 +5,14 @@ import Graph from './graph.js';
 import findIRR from './irr.js';
 import GetDrawData from "./drawData.js";
 import Button from '@material-ui/core/Button';
-import { getPathSVG, drawCanvas, FlexButton } from "./flexgraph.js";
+import { getPathSVG, drawCanvas, FlexButton, DrawShapesGraph } from "./flexgraph.js";
+
 
 
 export var modCashFlows = [];
 
 
-
+let isDraggingSlider = false;
 
 const dollarFormat = (number) => Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -35,12 +36,12 @@ function rndNearTenth(num) {
   return parseFloat((Math.round(num * 100) / 100).toFixed(2));
 }
 
-const numFormatter = new Intl.NumberFormat('en-US', {
+const commaDecimal = (number) => Intl.NumberFormat('en-US', {
   style: "decimal",
   maximumFractionDigits: 2
-})
+}).format(number);
 
-var someNumber = -88233442.57674;
+
 
 
 let canvasWidth = window.innerWidth * .9;
@@ -52,6 +53,13 @@ export let calcData = {
   initialInvest: 0,
   cashFlows: [0, 0, 0, 0, 0],
   modCashFlows: [],
+  positiveFlows: [],
+  negativeFlows: [],
+  highestFlow: [],
+  averagePositiveFlow: [],
+  averageNegativeFlow: [],
+  posFlowsTotal: 0,
+  negFlowsTotal: 0,
   theNPV: 0,
   npvSnap: [],
   snapGraphX: 0,
@@ -90,7 +98,7 @@ export let styles = {
 const calcCanvas = {
   position: "absolute",
   left: "13%",
-  top: "10%",
+  top: "0%",
 
   background: styles.canvasColor,
   height: "50vw",
@@ -185,14 +193,7 @@ const plusBtnContainer = {
   paddingLeft: "70%",
   paddingTop: "3%"
 }
-const cashBtmTxt = {
-  position: "absolute",
-  top: "87%",
-  left: "29%",
-  fontSize: ".7vw",
-  fontWeight: "medium"
 
-}
 // const negInitialInvStyle = {
 //   fontSize: "2vw",
 //   width: "auto",
@@ -210,17 +211,17 @@ const lineBreak = {
   width: "75%",
   position: "absolute"
 }
-const minusButtonStyle = {
+// const minusButtonStyle = {
 
-  fill: styles.innerCashBoxColor,
-  color: styles.medLightGray,
-  stroke: styles.medLightGray,
-  strokeWidth: "8%"
-}
-const minusLineStyle = {
-  stroke: styles.medLightGray,
-  strokeWidth: "8%"
-}
+//   fill: styles.innerCashBoxColor,
+//   color: styles.medLightGray,
+//   stroke: styles.medLightGray,
+//   strokeWidth: "8%"
+// }
+// const minusLineStyle = {
+//   stroke: styles.medLightGray,
+//   strokeWidth: "8%"
+// }
 
 //.....DISCOUNT RATE BOX.........
 
@@ -277,7 +278,7 @@ const NpvStatBox = {
   height: styles.firstRowHeight,
   width: "18.5%",
   borderRadius: styles.boxRadius,
-  overflowX: "auto"
+  overflowX: "hidden"
 }
 
 // const innerNpvStatBox = {
@@ -312,7 +313,8 @@ const avgNPVHeader = {
   top: 0,
   color: styles.gray,
   textAlign: "center",
-  marginTop: "-.5vw"
+  marginTop: "-.5vw",
+  marginBottom: 0
 }
 // const histListContents = { 
 //   paddingTop: 0,
@@ -333,15 +335,15 @@ const graphBox = {
   borderRadius: styles.boxRadius
 }
 
-const InstructionBox = {
-  position: "absolute",
-  top: styles.bottomRowPadTop,
-  left: styles.calcPadLeft,
-  background: '#FAEFC5',
-  height: styles.secondRowHeight,
-  width: "32.5%",
-  borderRadius: styles.boxRadius
-}
+// const InstructionBox = {
+//   position: "absolute",
+//   top: styles.bottomRowPadTop,
+//   left: styles.calcPadLeft,
+//   background: '#FAEFC5',
+//   height: styles.secondRowHeight,
+//   width: "32.5%",
+//   borderRadius: styles.boxRadius
+// }
 
 
 const header1 = {
@@ -351,63 +353,63 @@ const header1 = {
 }
 
 
-const header3 = {
-  fontWeight: "bold",
-  fontSize: "1.2vw",
-  textAlign: "center"
-}
+// const header3 = {
+//   fontWeight: "bold",
+//   fontSize: "1.2vw",
+//   textAlign: "center"
+// }
 
 
-const arrow1Style = {
-  position: "static",
-  background: "none",
-  paddingLeft: "27%",
-  paddingTop: "20%"
-}
+// const arrow1Style = {
+//   position: "static",
+//   background: "none",
+//   paddingLeft: "27%",
+//   paddingTop: "20%"
+// }
 
 
 
 
-const snapButtonPos = {
-  position: "absolute",
-  bottom: "15%",
+// const snapButtonPos = {
+//   position: "absolute",
+//   bottom: "15%",
 
 
-}
-const histTitle = {
-  position: "absolute",
-  fontSize: "1vw",
-  bottom: "33%",
-  left: "8%",
-}
+// }
+// const histTitle = {
+//   position: "absolute",
+//   fontSize: "1vw",
+//   bottom: "33%",
+//   left: "8%",
+// }
 
-const histTitle2 = {
-  position: "absolute",
-  fontSize: "1vw",
-  bottom: "33%",
-  right: "16%",
-}
-const instructionTitle = {
-  display: "grid",
-  fontSize: "1.1vw",
-  fontFamily: 'Montserrat',
-  textAlign: "center",
-  fontWeight: "bold"
-}
-const instructTextStyle = {
-  fontSize: ".6vw",
-  fontFamily: 'Montserrat',
-  paddingLeft: "5%",
-  paddingRight: "5%",
-  fontWeight: "regular"
-}
-const instructTextCenter = {
-  fontSize: ".7vw",
-  paddingLeft: "5%",
-  paddingRight: "5%",
-  textAlign: "center",
-  fontWeight: "bold"
-}
+// const histTitle2 = {
+//   position: "absolute",
+//   fontSize: "1vw",
+//   bottom: "33%",
+//   right: "16%",
+// }
+// const instructionTitle = {
+//   display: "grid",
+//   fontSize: "1.1vw",
+//   fontFamily: 'Montserrat',
+//   textAlign: "center",
+//   fontWeight: "bold"
+// }
+// const instructTextStyle = {
+//   fontSize: ".6vw",
+//   fontFamily: 'Montserrat',
+//   paddingLeft: "5%",
+//   paddingRight: "5%",
+//   fontWeight: "regular"
+// }
+// const instructTextCenter = {
+//   fontSize: ".7vw",
+//   paddingLeft: "5%",
+//   paddingRight: "5%",
+//   textAlign: "center",
+//   fontWeight: "bold"
+// }
 
 
 
@@ -481,7 +483,8 @@ function npvResult() {
     top: 0,
     color: styles.lightBlue,
     textAlign: "center",
-    marginTop: "-.5vw"
+    marginTop: "-.5vw",
+    marginBottom: "0vw"
   }
   // let length = parseInt(calcData.theNPV.toString().length);
   var npvResult = dollarFormat(calcData.theNPV);
@@ -494,8 +497,149 @@ function npvResult() {
   )
 
 }
+function jellyJar() {
+  let modFlows = calcData.modCashFlows.slice();
+  calcData.posFlowsTotal = 0;
+  calcData.negFlowsTotal = 0;
+  calcData.highestFlow = [];
+  calcData.positiveFlows = [];
+  calcData.negativeFlows = [];
+  calcData.averagePositiveFlow = [];
+  calcData.averageNegativeFlow = [];
+
+  for (let flow in calcData.modCashFlows) {
+    let flowValue = calcData.modCashFlows[flow];
+  
+    if (flowValue > 0) {
+      if (flowValue > calcData.highestFlow) {
+        calcData.highestFlow = flowValue;
+      }
+      calcData.positiveFlows.push(flowValue);
+      calcData.posFlowsTotal += flowValue;
+    }
+    else if (flowValue < 0) {
+      let inverseFlowValue = flowValue * -1;
+
+      if (inverseFlowValue > calcData.highestFlow) {
+        calcData.highestFlow = inverseFlowValue;
+      }
+      calcData.negativeFlows.push(inverseFlowValue);
+      calcData.negFlowsTotal += inverseFlowValue;
+    }
+  }
+  if (calcData.posFlowsTotal !== 0) {
+    calcData.averagePositiveFlow = calcData.posFlowsTotal/calcData.modCashFlows.length;
+  }
+  if (calcData.negFlowsTotal !== 0) {
+    calcData.averageNegativeFlow = calcData.negFlowsTotal/calcData.modCashFlows.length;
+  }
+
+  let containerHeight = calcData.highestFlow;
+  let heightMultiplier = containerHeight / 96;
+  let negativeLiquidHeight = Number(calcData.averageNegativeFlow/heightMultiplier) + 2;
+  let positiveLiquidHeight = Number(calcData.averagePositiveFlow/heightMultiplier) + 2;
 
 
+
+
+
+
+  // calcData.positiveFlows.sort();
+  // calcData.negativeFlows.sort();
+
+
+
+
+  let jellyStyles = {
+    canvasWidth: "15vw",
+    canvasHeight: "11vw",
+    canvasPadLeft: "-.7vw",
+    canvasPadTop: 0,
+    lineSize: .2,
+    fontSize: 2,
+    fontColor: "none",
+    axisColor: "none",
+    boxAxisColor: styles.darkGray,
+    boxRadius: .5,
+    axisLineSize: .2,
+
+    tickColor: "none",
+    tickLineSize: .1,
+    clickPointColor: "#C18FE4",
+    pointSize: 1,
+    selectedPointSize: 2,
+
+    markerLineSize: .3,
+    canvasColor: "none",
+}
+  let positiveLiquidDraw = [];
+  let negativeLiquidDraw = [];
+
+//load default data if none present "#F50057" "#27293E"
+    if (positiveLiquidHeight > 2) {
+     positiveLiquidDraw = [[98, 2], [98, positiveLiquidHeight + negativeLiquidHeight], [2, positiveLiquidHeight + negativeLiquidHeight], [2, 2]];
+    }
+
+    if (negativeLiquidHeight > 2) {
+   
+      negativeLiquidDraw = [[98, 2], [98, negativeLiquidHeight], [2, negativeLiquidHeight], [2, 2]]
+    }
+
+    let data = {
+      "#27293E": positiveLiquidDraw,
+      "#F50057": negativeLiquidDraw
+    }
+
+
+
+    
+  return DrawShapesGraph(data, jellyStyles);
+}
+
+function jellyDisplay() {
+  let posStyle = {
+    fontWeight: "medium",
+    color : styles.positiveColor,
+    fontSize: "1vw",
+    textAlign: "center",
+    margin: 0,
+  }
+
+  let plusStyle = {
+    fontWeight: "bold",
+    color : styles.canvasColor,
+    fontSize: ".8vw",
+    textAlign: "center",
+    margin: "-.2vw",
+  }
+
+  let negStyle = {
+    fontWeight: "medium",
+    color : styles.negativeColor,
+    fontSize: "1vw",
+    textAlign: "center",
+    marginLeft: "",
+    marginTop: 0,
+    marginBottom: 0,
+  }
+  function negOutput() {
+    if (calcData.negFlowsTotal !== 0) {
+      return commaDecimal(calcData.negFlowsTotal * -1);
+    }
+    else {
+      return 0;
+    }
+  }
+
+ 
+  return (
+    <div style = {{position: "absolute", width: "100%",height: "16%", bottom: "1%", background: "none"}}>
+      <p style = {posStyle}>{commaDecimal(calcData.posFlowsTotal)}</p>
+      <p style = {plusStyle}>+</p>
+      <p style = {negStyle}>{negOutput()}</p>
+    </div>
+  )
+}
 function App() {
 
 
@@ -656,7 +800,7 @@ function App() {
     }
 
     let mouseDown = () => {calcData.cashFlows.push(0); handleCashFlowChange() };
-    return FlexButton("plotButton", buttonStyle, mouseDown)
+    return FlexButton("addmoreButton", buttonStyle, mouseDown)
   }
 
   // function logNPV() {
@@ -767,7 +911,8 @@ function App() {
 
 
   return (
-    <div style={calcCanvas}>
+    <div style={calcCanvas}> 
+    
       {drawArrows()}
       <p style={calcTitle}>NET PRESENT VALUE CALCULATOR</p>
 
@@ -794,10 +939,14 @@ function App() {
         <div>{npvResult()}</div>
         <p style={header1}>AVG NPV PER PERIOD</p>
         <p style={avgNPVHeader}>{dollarFormat(calcData.avgNpvYr)}</p>
+        <div style = {{position: "absolute", top: "36%"}}>{jellyJar()}</div>
+        {jellyDisplay()}
+        
 
       </div>
 
       <div style={graphBox}>
+        <p style ={header1}>RATE OF RETURN V. NPV GRAPH</p>
 
         {Graph()}
       </div>

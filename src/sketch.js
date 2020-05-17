@@ -13,6 +13,10 @@ let updateData = true;
 let animDrawData = [];
 let drawData = [];
 
+const commaDecimal = (number) => Intl.NumberFormat('en-US', {
+  style: "decimal",
+  maximumFractionDigits: 0
+}).format(number);
 
 
 function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, strokeWidth, radius) {
@@ -38,10 +42,26 @@ function Sketch(){
   if (updateData){
     drawData = GetDrawData();
     let numBars = drawData.values.drawBarHeights.length;
-    let  textWidth = "50%";
-    if (numBars >= 4) {
-    textWidth = (2/numBars)*100 + "%";
-    } 
+    let  textWidth = "67%";
+    let longestLength = commaDecimal(calcData.highestFlow).toString().length;
+    
+      let drawText = true;
+      let multiplier = longestLength/2;
+      let divider = 400;
+      if (numBars <= 3) {
+        divider = numBars * 100;
+      }
+      if (longestLength < 4) {
+        multiplier= 1;
+      }
+      textWidth = divider/(numBars * multiplier) + "%";
+      if (longestLength > 8 || numBars > 13) { 
+        drawText = false;
+      }
+
+    
+    
+    
     //push wave points and rectange svg to local drawData
     for (var value in drawData.values.drawBarHeights) {
       let key = value;
@@ -52,7 +72,9 @@ function Sketch(){
           drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value]]);         
           //drawData.points.negWavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
           drawData.points.negWavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.drawBoxHeight]);
-          drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} fill={styles.positiveColor} x={drawData.values.barPosX -1} y="110">{Math.round(calcData.modCashFlows[value])}</text>)
+          if (drawText === true) {
+            drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} fill={styles.positiveColor} x={drawData.values.barPosX -1} y="112">{commaDecimal(calcData.modCashFlows[value])}</text>)
+          }
           drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
          
       }
@@ -64,7 +86,9 @@ function Sketch(){
           drawData.points.negWavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.barCanvas - drawData.values.drawBarHeights[value] * -1]);
           //  drawData.points.wavePoints.push([drawData.values.barPosX, drawData.values.drawBoxHeight]);
           drawData.points.wavePoints.push([drawData.values.barPosX + drawData.values.barWidth, drawData.values.drawBoxHeight]);
-          drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} fill={styles.negativeColor} x={drawData.values.barPosX -1} y="110">{Math.round(calcData.modCashFlows[value])}</text>)
+          if (drawText === true) {
+          drawData.rectangles.modFlows.push(<text key={key + "modText"} style={{fontSize: textWidth}} fill={styles.negativeColor} x={drawData.values.barPosX -1} y="112">{commaDecimal(calcData.modCashFlows[value])}</text>)
+          }
           drawData.values.barPosX += (drawData.values.barWidth + drawData.values.barPadx);
           
           

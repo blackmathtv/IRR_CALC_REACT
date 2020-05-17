@@ -1,4 +1,5 @@
 import React from 'react';
+import { isCompositeComponent } from 'react-dom/test-utils';
 
 let globalStyles = {
     clickedPoint: null,
@@ -190,6 +191,9 @@ export function sortXYArray(data, styles, xLimit, yLimit, drawFree, range) {
 
     
     for (let set in data) {
+        if (!styles.type) {
+            styles.type = [];
+        }
         //if there is actually data
         let sortedData = {};
         let lastEntry = null;
@@ -332,11 +336,13 @@ export function sortXYArray(data, styles, xLimit, yLimit, drawFree, range) {
         let set = 0
         //data is an object that has keys with the color attribute, use a count instead for set attribute
         for (let i in data) {
-            //push the modified data in original order for drawing shapes and stuff            
-            for (let pair in data[i]) {
-                combinedData.sortedData[set].drawArray.push([((data[i][pair][0] - combinedData.xMin) * combinedData.xMultiplier) + combinedData.padLeft, combinedData.yLimit - ((data[i][pair][1] - combinedData.yMin) * combinedData.yMultiplier) + combinedData.padTop]);
+            //push the modified data in original order for drawing shapes and stuff
+            if (data[i].length) {      
+                for (let pair in data[i]) {
+                    combinedData.sortedData[set].drawArray.push([((data[i][pair][0] - combinedData.xMin) * combinedData.xMultiplier) + combinedData.padLeft, combinedData.yLimit - ((data[i][pair][1] - combinedData.yMin) * combinedData.yMultiplier) + combinedData.padTop]);
+                }
+                set += 1;
             }
-            set += 1;
         }
     }
    
@@ -392,7 +398,6 @@ export function getYAxisSVG(sortedData, styles) {
     let tickArray = [];
 
     let middleX = ((100 - sortedData.padLeft) + sortedData.padLeft / 2) / 2;
-    let yLine = getPathSVG("yLine", styles, [[sortedData.padLeft, 100 - sortedData.padTop], [sortedData.padLeft, sortedData.padTop]], styles.axisColor, styles.axisLineSize);
 
     let rulerOffset = sortedData.yLimit / styles.yTicks; //the offset for thephysical position on the canvas
     let rulerStep = diff(sortedData.yMin, sortedData.yMax) / styles.yTicks; //the value offset 
@@ -412,16 +417,18 @@ export function getYAxisSVG(sortedData, styles) {
             tickArray.push(getPathSVG("ytickline" + i, styles, [[sortedData.padLeft, rulerPosition - (rulerOffset * i)], [100 - sortedData.padLeft, rulerPosition - (rulerOffset * i)]], styles.tickColor, styles.tickLineSize, 0, 1));
         }
     }
+    let yLine = getPathSVG("yLine", styles, [[sortedData.padLeft, 100 - sortedData.padTop], [sortedData.padLeft, sortedData.padTop]], styles.axisColor, styles.axisLineSize);
 
 
     let label = getTextSVG("ylabeltext", styles.yName, [(-middleX / 1.8) / styles.heightMultiplier, sortedData.padLeft * 1.25], styles.fontSize, styles.labelColor);
 
     return (
         <svg key="yaxissvg">
+            {yLine}
             <g transform='rotate(-90)' >{label}</g>
             {textArray}
             {tickArray}
-            {yLine}
+            
         </svg>
     )
 }
@@ -453,8 +460,14 @@ export function getmarkerLine(sortedData, styles) {
 export function GraphPoints(key, sortedData, styles) {
     let circleArray = [];
     let popBox = []
+    
+    let initValue = [];
 
-    const [selectedPoint, setSelectedPoint] = React.useState({ value: [], draw: []});
+    
+
+        //initValue = [styles.selectedPoint[0], styles.selectedPoint[1]];
+
+    const [selectedPoint, setSelectedPoint] = React.useState({value: initValue, draw: []});
     const [hovered, setHovered] = React.useState([]);
     //const [popTopLeft, setPopTopLeft] = React.useState([]);
    
@@ -473,6 +486,7 @@ export function GraphPoints(key, sortedData, styles) {
 
 
     for (let set in sortedData) {
+      
         let alreadySelected = false;
         if (!styles.type || sortedData[set].type === "Mark" || sortedData[set.type] === "LineMark") {
             for (let pair in sortedData[set].drawArray) {
@@ -488,11 +502,24 @@ export function GraphPoints(key, sortedData, styles) {
                 let xVal = currentPair[0];
                 let yVal = currentPair[1];
 
+                // if (currentPair[0] === selectedPoint.value[0] && currentPair[1] === selectedPoint.value[1] && alreadySelected === false) {
+                //     color = styles.clickPointColor;
+                //     alreadySelected = true;
+                //     radius = styles.selectedPointSize;
+                // }
+                if (currentPair[0] === styles.selectedPoint[0] && currentPair[1] === styles.selectedPoint[1]) {
+          
+                    color = styles.clickPointColor;
+                    //alreadySelected = true;
+                  
+                
+                }
                 if (currentPair[0] === selectedPoint.value[0] && currentPair[1] === selectedPoint.value[1] && alreadySelected === false) {
                     color = styles.clickPointColor;
                     alreadySelected = true;
                     radius = styles.selectedPointSize;
                 }
+
                 if (set === hovered[0] && pair === hovered[1]) {
                     radius = styles.selectedPointSize;
                 }
@@ -544,8 +571,8 @@ export function drawCanvas(key, styles, Sketch) {
 
     return (
         <div key={key} style={{ position: "absolute", top: styles.canvasPadTop, left: styles.canvasPadLeft, width: styles.canvasWidth, height: styles.canvasHeight }}>
-            <svg key = "canvasBox" style={{ background: styles.canvasColor }} viewBox={ViewBox}>
-                {Sketch}
+            <svg key = {key + "canvasBox"} style={{ background: styles.canvasColor }} viewBox={ViewBox}>
+                 {Sketch}
             </svg>
         </div>
     )
@@ -771,20 +798,21 @@ export function DrawShapesGraph(data, styles) {
     if (!styles) {
         styles = defaults;
     }
-
+    
     let Paths = [];
 
     let combinedData = sortXYArray(data, styles, 80, 80, true, [[0, 0], [100, 100]]);
 
     let sortedData = combinedData.sortedData;
+
     for (let set in sortedData) {
+        
         let Path = getPathSVG("graphPath" + set, styles, sortedData[set].drawArray, sortedData[set].color, styles.lineSize, 0, 0, sortedData[set].color);
         Paths.push(Path);
     }
 
-    let displaySVG = getValueDisplay(combinedData, styles);
     let boxAxis = getBoxAxis(combinedData, styles);
-    let canvas = drawCanvas("shapescanvas", styles, [boxAxis, Paths, displaySVG]);
+    let canvas = drawCanvas("shapescanvas", styles, [boxAxis, Paths]);
     return (canvas);
 
 }
@@ -847,7 +875,7 @@ function GetDisplayPop(styles, selectedPoint) {
         if (yVal.length > 8){
            yValueFontSize = 12/yVal.length;
         }
-        console.log(xValueFontSize);
+     
         
     
         //this calculates the center position of the text based on the font size and length of input
@@ -856,12 +884,25 @@ function GetDisplayPop(styles, selectedPoint) {
 
         xValueXPosition = (topLeftPoint[0] + 5.75) - ((xValueFontSize/3.11) * (xVal.toString().length -1))  + "%";
         yValueXPosition = (topLeftPoint[0] + 5.75) - ((yValueFontSize/3.11) * (yVal.toString().length -1))  + "%";
-
+        
+        //calc specific if statement, remove first part later
+        let irrFontSize = 2;
+        let irrHeaderXPosition = (topLeftPoint[0] + 5.75) - ((irrFontSize/3.11) * (xVal.toString().length -1))  + "%";
+        if (globalStyles.clickedPoint.value[1] === 0) {
+            text.push(getTextSVG("Xname", "IRR", [(topLeftPoint[0] + 5) - ((xHeaderFontSize/3.11) * (styles.popXDisplay.toString().length -1))  + "%", topLeftPoint[1] + 6 + "%"], 2, styles.background, "bold", ))
+        text.push(getTextSVG("Xvalue",  xVal, [irrHeaderXPosition, topLeftPoint[1] + 12 + "%"], irrFontSize, styles.background, "bold", ))
+            
+        }
+        //keep this part, remove from if statement
+        else {
         text.push(getTextSVG("Xname", styles.popXDisplay, [xHeaderXPosition, topLeftPoint[1] + 4 + "%"], xHeaderFontSize, styles.background, styles.displayFontWeight, ))
         text.push(getTextSVG("Xvalue",  xVal, [xValueXPosition, topLeftPoint[1] + 8 + "%"], xValueFontSize, styles.background, "bold", ))
         text.push(getTextSVG("yname", styles.popYDisplay, [yHeaderXPosition, topLeftPoint[1] + 12 + "%"], yHeaderFontSize, styles.background, styles.displayFontWeight, ))
         text.push(getTextSVG("yvalue",   yVal, [yValueXPosition, topLeftPoint[1] + 16 + "%"], yValueFontSize, styles.background, "bold", ))
 
+
+        }
+        
         
 
         // text.push(getTextSVG("Yname", styles.popYDisplay + " " + globalStyles.clickedPoint.value[1] + styles.ySymbol, [topLeftPoint[0] + 1 + "%", topLeftPoint[1] + 12 + "%"], styles.displayFontSize, styles.background, styles.displayFontWeight, ))
