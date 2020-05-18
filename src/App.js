@@ -673,7 +673,7 @@ function App() {
       let npv = null;
       for (let flow = 1; flow < calcData.cashFlows.length; flow++) {
         let cashFlow = removeCommas(calcData.cashFlows[flow]);
-        let powerOf = parseInt(flow) + 1;
+        let powerOf = parseInt(flow);
         let discountedFlow = cashFlow / Math.pow(1 + rDec, powerOf);
         npv += discountedFlow;
       }
@@ -914,7 +914,7 @@ function App() {
     for (let flow = 1; flow < cashFlows.length; flow++) {
       let cashFlow = removeCommas(cashFlows[flow]);
       
-      let powerOf = parseInt(flow) + 1;
+      let powerOf = parseInt(flow);
       let discountedFlow = cashFlow / Math.pow(1 + rDec, powerOf);
       calcData.modCashFlows.push(discountedFlow);
       npv += discountedFlow;

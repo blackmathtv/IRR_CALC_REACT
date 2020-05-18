@@ -71,7 +71,7 @@ function Graph()  {
   npvSnap = calcData.npvSnap;
 
 
-
+ 
   let data = {
     "#47C4C1": calcInput,
     "#ADDCE3": npvSnap
