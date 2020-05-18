@@ -2,6 +2,7 @@ import React from 'react';
 import Sketch from './sketch'
 import './App.css';
 import Graph from './graph.js';
+import JellyJar, {jellyDisplay} from './jellyJar.js';
 // import findIRR from './irr.js';
 
 
@@ -10,9 +11,6 @@ import { getPathSVG, drawCanvas, FlexButton, DrawShapesGraph } from "./flexgraph
 
 
 export var modCashFlows = [];
-
-
-let isDraggingSlider = false;
 
 const dollarFormat = (number) => Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -35,16 +33,17 @@ function rndNearTenth(num) {
   return parseFloat((Math.round(num * 100) / 100).toFixed(2));
 }
 
-const commaDecimal = (number) => Intl.NumberFormat('en-US', {
+export const commaDecimal = (number) => Intl.NumberFormat('en-US', {
   style: "decimal",
-  maximumFractionDigits: 2
+  maximumFractionDigits: 2,
+  minimumFractionDigits: 2
 }).format(number);
 
 
 
 
-let canvasWidth = window.innerWidth * .9;
-let canvasHeight = canvasWidth / 2.32;
+// let canvasWidth = window.innerWidth * .9;
+// let canvasHeight = canvasWidth / 2.32;
 
 
 
@@ -70,8 +69,7 @@ export let calcData = {
   allNpvPoints: []
 };
 export let styles = {
-  canvasWidth: canvasWidth,
-  canvasHeight: canvasHeight,
+
   canvasColor: "#E9E9E9",
   lightCanvasColor: "#FFFFFF",
   textColor: "#000000",
@@ -470,149 +468,190 @@ function npvResult() {
   )
 
 }
-function jellyJar() {
 
-  calcData.posFlowsTotal = 0;
-  calcData.negFlowsTotal = 0;
-  calcData.highestFlow = [];
-  calcData.positiveFlows = [];
-  calcData.negativeFlows = [];
-  calcData.averagePositiveFlow = [];
-  calcData.averageNegativeFlow = [];
+ 
+// let counter = 0
+// let increase = Math.PI * 2/9.23;
+// let negCounter = 0
+// // let negIncrease = Math.PI * 2/9.24;
+// let negIncrease = Math.PI * 2/9.41;
+// function jellyJar() {
 
-  for (let flow in calcData.modCashFlows) {
-    let flowValue = calcData.modCashFlows[flow];
+
+//   calcData.posFlowsTotal = 0;
+//   calcData.negFlowsTotal = 0;
+//   calcData.highestFlow = [];
+//   calcData.positiveFlows = [];
+//   calcData.negativeFlows = [];
+//   calcData.averagePositiveFlow = [];
+//   calcData.averageNegativeFlow = [];
+
+//   for (let flow in calcData.modCashFlows) {
+//     let flowValue = calcData.modCashFlows[flow];
   
-    if (flowValue > 0) {
-      if (flowValue > calcData.highestFlow) {
-        calcData.highestFlow = flowValue;
-      }
-      calcData.positiveFlows.push(flowValue);
-      calcData.posFlowsTotal += flowValue;
-    }
-    else if (flowValue < 0) {
-      let inverseFlowValue = flowValue * -1;
+//     if (flowValue > 0) {
+//       if (flowValue > calcData.highestFlow) {
+//         calcData.highestFlow = flowValue;
+//       }
+//       calcData.positiveFlows.push(flowValue);
+//       calcData.posFlowsTotal += flowValue;
+//     }
+//     else if (flowValue < 0) {
+//       let inverseFlowValue = flowValue * -1;
 
-      if (inverseFlowValue > calcData.highestFlow) {
-        calcData.highestFlow = inverseFlowValue;
-      }
-      calcData.negativeFlows.push(inverseFlowValue);
-      calcData.negFlowsTotal += inverseFlowValue;
-    }
-  }
-  if (calcData.posFlowsTotal !== 0) {
-    calcData.averagePositiveFlow = calcData.posFlowsTotal/calcData.modCashFlows.length;
-  }
-  if (calcData.negFlowsTotal !== 0) {
-    calcData.averageNegativeFlow = calcData.negFlowsTotal/calcData.modCashFlows.length;
-  }
+//       if (inverseFlowValue > calcData.highestFlow) {
+//         calcData.highestFlow = inverseFlowValue;
+//       }
+//       calcData.negativeFlows.push(inverseFlowValue);
+//       calcData.negFlowsTotal += inverseFlowValue;
+//     }
+//   }
+//   if (calcData.posFlowsTotal !== 0) {
+//     calcData.averagePositiveFlow = calcData.posFlowsTotal/calcData.modCashFlows.length;
+//   }
+//   if (calcData.negFlowsTotal !== 0) {
+//     calcData.averageNegativeFlow = calcData.negFlowsTotal/calcData.modCashFlows.length;
+//   }
 
-  let containerHeight = calcData.highestFlow;
-  let heightMultiplier = containerHeight / 96;
-  let negativeLiquidHeight = Number(calcData.averageNegativeFlow/heightMultiplier) + 2;
-  let positiveLiquidHeight = Number(calcData.averagePositiveFlow/heightMultiplier) + 2;
-
-
+//   let containerHeight = calcData.highestFlow;
+//   let heightMultiplier = containerHeight / 96;
+//   let negativeLiquidHeight = Number(calcData.averageNegativeFlow/heightMultiplier) + 2;
+//   let positiveLiquidHeight = Number(calcData.averagePositiveFlow/heightMultiplier) + 2;
 
 
 
 
-  // calcData.positiveFlows.sort();
-  // calcData.negativeFlows.sort();
+
+
+//   // calcData.positiveFlows.sort();
+//   // calcData.negativeFlows.sort();
 
 
 
+//   let jellyStyles = {
+//     canvasWidth: "15vw",
+//     canvasHeight: "11vw",
+//     canvasPadLeft: "-.7vw",
+//     canvasPadTop: 0,
+//     lineSize: .2,
+//     fontSize: 2,
+//     fontColor: "none",
+//     axisColor: "none",
+//     boxAxisColor: styles.darkGray,
+//     boxRadius: .5,
+//     axisLineSize: .2,
 
-  let jellyStyles = {
-    canvasWidth: "15vw",
-    canvasHeight: "11vw",
-    canvasPadLeft: "-.7vw",
-    canvasPadTop: 0,
-    lineSize: .2,
-    fontSize: 2,
-    fontColor: "none",
-    axisColor: "none",
-    boxAxisColor: styles.darkGray,
-    boxRadius: .5,
-    axisLineSize: .2,
+//     tickColor: "none",
+//     tickLineSize: .1,
+//     clickPointColor: "#C18FE4",
+//     pointSize: 1,
+//     selectedPointSize: 2,
 
-    tickColor: "none",
-    tickLineSize: .1,
-    clickPointColor: "#C18FE4",
-    pointSize: 1,
-    selectedPointSize: 2,
 
-    markerLineSize: .3,
-    canvasColor: "none",
-}
-  let positiveLiquidDraw = [];
-  let negativeLiquidDraw = [];
+//     markerLineSize: .3,
+//     canvasColor: "none",
+// }
+//   let positiveLiquidDraw = [];
+//   let negativeLiquidDraw = [];
 
-//load default data if none present "#F50057" "#27293E"
-    if (positiveLiquidHeight > 2) {
-     positiveLiquidDraw = [[98, 2], [98, positiveLiquidHeight + negativeLiquidHeight], [2, positiveLiquidHeight + negativeLiquidHeight], [2, 2]];
-    }
+  
+//   //wave animation on slider change
+//   function getSine(isPositive) {
 
-    if (negativeLiquidHeight > 2) {
+//   if (isPositive === true) {
+//    counter += increase
+//    let y = Math.sin(counter) /2 + .5;
+//    console.log(y);
+//    return y * 3
    
-      negativeLiquidDraw = [[98, 2], [98, negativeLiquidHeight], [2, negativeLiquidHeight], [2, 2]]
-    }
+//   }
+//   else {
+//     negCounter += negIncrease
+//     let y = Math.sin(negCounter) /2 + .5;
+//     return y *1.5
 
-    let data = {
-      "#27293E": positiveLiquidDraw,
-      "#F50057": negativeLiquidDraw
-    }
+//   }
+    
+//   }
+
+// //load default data if none present "#F50057" "#27293E"
+//     if (positiveLiquidHeight > 2) {
+      
+//       positiveLiquidDraw.push([98, 2], [98, positiveLiquidHeight + negativeLiquidHeight + getSine(true)]);
+
+//       for (let i = 92; i > 2; i -= 8) {
+//         positiveLiquidDraw.push([i, positiveLiquidHeight + negativeLiquidHeight + getSine(true)])
+//       }
+
+//      positiveLiquidDraw.push( [2, positiveLiquidHeight + negativeLiquidHeight + getSine(true)], [2, 2]);
+//     }
+    
+
+//     if (negativeLiquidHeight > 2) {
+//       negativeLiquidDraw.push([98, 2], [98, negativeLiquidHeight + getSine(false)]);
+//       for (let i = 92; i > 2; i -= 8) {
+//         negativeLiquidDraw.push([i, negativeLiquidHeight + getSine(false)])
+//       }
+
+//       negativeLiquidDraw.push([2, negativeLiquidHeight + getSine(false)], [2, 2] )
+  
+//     }
+
+//     let data = {
+//       "#27293E": positiveLiquidDraw,
+//       "#F50057": negativeLiquidDraw
+//     }
 
 
 
     
-  return DrawShapesGraph(data, jellyStyles);
-}
+//   return DrawShapesGraph(data, jellyStyles);
+// }
 
-function jellyDisplay() {
-  let posStyle = {
-    fontWeight: "medium",
-    color : styles.positiveColor,
-    fontSize: "1vw",
-    textAlign: "center",
-    margin: 0,
-  }
+// function jellyDisplay() {
+//   let posStyle = {
+//     fontWeight: "medium",
+//     color : styles.positiveColor,
+//     fontSize: "1vw",
+//     textAlign: "center",
+//     margin: 0,
+//   }
 
-  let plusStyle = {
-    fontWeight: "bold",
-    color : styles.canvasColor,
-    fontSize: ".8vw",
-    textAlign: "center",
-    margin: "-.2vw",
-  }
+//   let plusStyle = {
+//     fontWeight: "bold",
+//     color : styles.canvasColor,
+//     fontSize: ".8vw",
+//     textAlign: "center",
+//     margin: "-.2vw",
+//   }
 
-  let negStyle = {
-    fontWeight: "medium",
-    color : styles.negativeColor,
-    fontSize: "1vw",
-    textAlign: "center",
-    marginLeft: "",
-    marginTop: 0,
-    marginBottom: 0,
-  }
-  function negOutput() {
-    if (calcData.negFlowsTotal !== 0) {
-      return commaDecimal(calcData.negFlowsTotal * -1);
-    }
-    else {
-      return 0;
-    }
-  }
+//   let negStyle = {
+//     fontWeight: "medium",
+//     color : styles.negativeColor,
+//     fontSize: "1vw",
+//     textAlign: "center",
+//     marginLeft: "",
+//     marginTop: 0,
+//     marginBottom: 0,
+//   }
+//   function negOutput() {
+//     if (calcData.negFlowsTotal !== 0) {
+//       return commaDecimal(calcData.negFlowsTotal * -1);
+//     }
+//     else {
+//       return 0;
+//     }
+//   }
 
  
-  return (
-    <div style = {{position: "absolute", width: "100%",height: "16%", bottom: "1%", background: "none"}}>
-      <p style = {posStyle}>{commaDecimal(calcData.posFlowsTotal)}</p>
-      <p style = {plusStyle}>+</p>
-      <p style = {negStyle}>{negOutput()}</p>
-    </div>
-  )
-}
+//   return (
+//     <div style = {{position: "absolute", width: "100%",height: "16%", bottom: "1%", background: "none"}}>
+//       <p style = {posStyle}>{commaDecimal(calcData.posFlowsTotal)}</p>
+//       <p style = {plusStyle}>+</p>
+//       <p style = {negStyle}>{negOutput()}</p>
+//     </div>
+//   )
+// }
 function App() {
 
 
@@ -629,7 +668,7 @@ function App() {
         style={{
           position: "absolute",
           // background: "none",
-          width: "3vw",
+          width: "3.3vw",
           // height: "2.6vw",
           top: "-.4vw",
           left: "7.4vw",
@@ -834,10 +873,10 @@ function App() {
 
     return (contents)
   }
-
+  
   function DiscountRateSlider() {
     return (
-      <input type="range" min="0" max="100" step={1} style={sliderStyle} value={calcData.r} name="ROR" onChange={(event) => { calcData.r = parseFloat(event.target.value).toFixed(2); calcData.discountFactor = rndNearTenth(1 / (1 + (calcData.r / 100))); findNPV(calcData.cashFlows, calcData.r, calcData.initialInvest) }} />
+      <input type="range" min="0" max="100" step={1} style={sliderStyle}  value={calcData.r} name="ROR" onChange={(event) => { calcData.r = parseFloat(event.target.value).toFixed(2); calcData.discountFactor = rndNearTenth(1 / (1 + (calcData.r / 100))); findNPV(calcData.cashFlows, calcData.r, calcData.initialInvest) }} />
     )
   }
 
@@ -872,7 +911,7 @@ function App() {
         <div>{npvResult()}</div>
         <p style={header1}>AVG NPV PER PERIOD</p>
         <p style={avgNPVHeader}>{dollarFormat(calcData.avgNpvYr)}</p>
-        <div style = {{position: "absolute", top: "36%"}}>{jellyJar()}</div>
+        <div style = {{position: "absolute", top: "36%"}}>{JellyJar()}</div>
         {jellyDisplay()}
         
 
