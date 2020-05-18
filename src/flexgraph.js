@@ -459,7 +459,7 @@ export function getmarkerLine(sortedData, styles) {
 
 export function GraphPoints(key, sortedData, styles) {
     let circleArray = [];
-    let popBox = []
+   
     
     let initValue = [];
 
@@ -540,7 +540,7 @@ export function GraphPoints(key, sortedData, styles) {
     }
 
 
-    return (<svg>{circleArray}{popBox}</svg>);
+    return (<svg key = "graphpoints">{circleArray}</svg>);
 }
 export function getBoxAxis(sortedData, styles) {
     let boxStyle = {
@@ -559,7 +559,7 @@ export function getBoxAxis(sortedData, styles) {
     let YAxis = getYAxisSVG(sortedData, styles);
 
     return (
-        <g>
+        <g key = "boxaxis">
             {YAxis}{XAxis}{box}
         </g>
     )
@@ -572,7 +572,7 @@ export function drawCanvas(key, styles, Sketch) {
     return (
         <div key={key} style={{ position: "absolute", top: styles.canvasPadTop, left: styles.canvasPadLeft, width: styles.canvasWidth, height: styles.canvasHeight }}>
             <svg key = {key + "canvasBox"} style={{ background: styles.canvasColor }} viewBox={ViewBox}>
-                 {Sketch}
+                <g key= "sketch">{Sketch}</g> 
             </svg>
         </div>
     )
@@ -639,8 +639,8 @@ export function LineMarkGraph(data, styles) {
     }
 
 
-    let plot = GraphPoints("pointsarray", sortedData, styles);
-    plots.push(plot);
+    plots = GraphPoints("pointsarray", sortedData, styles);
+   
     let displayPop = GetDisplayPop(styles);
 
     XAxis = getXAxisSVG(combinedData, styles);

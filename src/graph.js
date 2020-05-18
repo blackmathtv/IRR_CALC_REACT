@@ -4,8 +4,7 @@ import '../node_modules/react-vis/dist/style.css';
 import {styles} from './App.js';
 import {calcData} from "./App.js";
 import {LineMarkGraph} from './flexgraph.js'
-import { calc } from 'popmotion';
-import { isCompositeComponent } from 'react-dom/test-utils';
+
 
 
 

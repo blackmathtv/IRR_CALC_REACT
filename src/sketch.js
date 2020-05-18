@@ -1,13 +1,13 @@
 import React from 'react';
-import DrawSmooth  from "./bezierInterp.js";
+// import DrawSmooth  from "./bezierInterp.js";
 import GetDrawData from "./drawData.js"
-import { spring } from 'popmotion';
+// import { spring } from 'popmotion';
 import { styles } from './App.js'
 import {calcData} from "./App.js";
  
 
 
-const pathSettle = 50;
+// const pathSettle = 50;
 
 let updateData = true;
 let animDrawData = [];
@@ -46,7 +46,7 @@ function Sketch(){
     let longestLength = commaDecimal(calcData.highestFlow).toString().length;
     
       let drawText = true;
-      let multiplier = longestLength/2;
+      let multiplier = longestLength/3;
       let divider = 400;
       if (numBars <= 3) {
         divider = numBars * 100;
@@ -54,8 +54,9 @@ function Sketch(){
       if (longestLength < 4) {
         multiplier= 1;
       }
-      textWidth = divider/(numBars * multiplier) + "%";
-      if (longestLength > 8 || numBars > 13) { 
+      let tWidth = divider/(numBars * multiplier);
+      textWidth = tWidth + "%";
+      if (tWidth < 17) { 
         drawText = false;
       }
 
@@ -103,12 +104,12 @@ function Sketch(){
     drawData = animDrawData;
   }
 
-  async function runSpring() {    
-    for (let point in drawData.points.wavePoints) {
-      spring({ from: drawData.points.wavePoints[point][1], to: pathSettle, stiffness: 150, damping: 5 })
-          .start(v => {drawData.points.wavePoints[point][1] = v; setpath(DrawSmooth(drawData.points.wavePoints, 1))})
-    }
-  }
+  // async function runSpring() {    
+  //   for (let point in drawData.points.wavePoints) {
+  //     spring({ from: drawData.points.wavePoints[point][1], to: pathSettle, stiffness: 150, damping: 5 })
+  //         .start(v => {drawData.points.wavePoints[point][1] = v; setpath(DrawSmooth(drawData.points.wavePoints, 1))})
+  //   }
+  // }
 
   if(drawData.rectangles.bars.length > 0){
     return(
