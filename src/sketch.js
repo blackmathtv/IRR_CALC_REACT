@@ -36,8 +36,8 @@ function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, st
 
 function Sketch(){
   //console.log("Ran Sketch");  
-  
-  const [path, setpath] = React.useState();
+  //wave path
+  // const [path, setpath] = React.useState();
  
   if (updateData){
     drawData = GetDrawData();
@@ -124,7 +124,7 @@ function Sketch(){
           height: "90%"
           }}
           viewBox="0 0 200 100"
-        >{drawData.rectangles.bars}{drawData.rectangles.modFlows}{drawData.rectangles.glass}{path}
+        >{drawData.rectangles.bars}{drawData.rectangles.modFlows}{drawData.rectangles.glass}
         </svg>
         <div>
         {/* <button name="animate" onClick ={ () => {updateData= false; animDrawData = drawData; runSpring()}}>Animate Waves</button>   */}

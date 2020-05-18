@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import './App.css';
 import '../node_modules/react-vis/dist/style.css';
 import {styles} from './App.js';
@@ -72,9 +72,6 @@ function Graph()  {
 
 
 
-
-
-let lineColor = styles.gray
   let data = {
     "#47C4C1": calcInput,
     "#ADDCE3": npvSnap

@@ -2,9 +2,9 @@ import React from 'react';
 import Sketch from './sketch'
 import './App.css';
 import Graph from './graph.js';
-import findIRR from './irr.js';
-import GetDrawData from "./drawData.js";
-import Button from '@material-ui/core/Button';
+// import findIRR from './irr.js';
+
+
 import { getPathSVG, drawCanvas, FlexButton, DrawShapesGraph } from "./flexgraph.js";
 
 
@@ -20,8 +20,7 @@ const dollarFormat = (number) => Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2
 }).format(number);
 
-const commaFormat = (number) => Intl.NumberFormat().format(number);
-var idk = "38843,3992"
+
 function removeCommas(num) {
 
   if (num) {
@@ -46,7 +45,7 @@ const commaDecimal = (number) => Intl.NumberFormat('en-US', {
 
 let canvasWidth = window.innerWidth * .9;
 let canvasHeight = canvasWidth / 2.32;
-let loggedNPVs = [];
+
 
 
 export let calcData = {
@@ -177,22 +176,7 @@ const cashBottom = {
   fontSize: ".9vw",
   color: styles.darkGray
 }
-const plusButtonStyle = {
 
-  fill: styles.innerCashBoxColor,
-  color: styles.darkGray,
-  stroke: styles.darkGray,
-  strokeWidth: "5%"
-}
-const plusLineStyle = {
-  stroke: styles.darkGray,
-  strokeWidth: "5%"
-}
-const plusBtnContainer = {
-  position: "absolute",
-  paddingLeft: "70%",
-  paddingTop: "3%"
-}
 
 // const negInitialInvStyle = {
 //   fontSize: "2vw",
@@ -292,17 +276,6 @@ const NpvStatBox = {
 //   //fontWeight: "800"
 // }
 
-
-const NPVHeader = {
-
-  position: "relative",
-  fontWeight: "medium",
-  fontSize: "1.8vw",
-  top: 0,
-  color: styles.lightBlue,
-  textAlign: "center",
-  marginTop: "-.5vw"
-}
 
 
 const avgNPVHeader = {
@@ -498,7 +471,7 @@ function npvResult() {
 
 }
 function jellyJar() {
-  let modFlows = calcData.modCashFlows.slice();
+
   calcData.posFlowsTotal = 0;
   calcData.negFlowsTotal = 0;
   calcData.highestFlow = [];
@@ -710,7 +683,7 @@ function App() {
 
     findNPV(calcData.cashFlows, calcData.r);
     calcData.npvSnap = [];
-    loggedNPVs = [];
+
   }
   function minusButton(value) {
     return (
@@ -723,37 +696,19 @@ function App() {
     )
   }
 
-  function autoButton() {
-    return (
-      <div>
-        <button onClick={() => { calcData.irr = Math.round((findIRR(calcData.cashFlows, calcData.initialInvest)[0]) * 100) / 100; setNpvRan(npvRan + 1) }}>AUTO IRR</button>
-        <p>irr:{calcData.irr}</p>
-      </div>
-    )
-  }
-
-  function cashFlowPlusBtn() {
-    return (
-      <svg height="1.3vw" width="1.3vw" style={plusBtnContainer} onClick={() => { calcData.cashFlows.push(0); handleCashFlowChange() }} >
-        <circle style={plusButtonStyle} cx="50%" cy="50%" r="38%" />
-        <line style={plusLineStyle} x1="30%" y1="50%" x2="70%" y2="50%" />
-        <line style={plusLineStyle} x1="50%" y1="70%" x2="50%" y2="30%" />
-      </svg>
-    )
-  }
+  // function autoButton() {
+  //   return (
+  //     <div>
+  //       <button onClick={() => { calcData.irr = Math.round((findIRR(calcData.cashFlows, calcData.initialInvest)[0]) * 100) / 100; setNpvRan(npvRan + 1) }}>AUTO IRR</button>
+  //       <p>irr:{calcData.irr}</p>
+  //     </div>
+  //   )
+  // }
 
 
 
-  function snapNPVBtn() {
-    return (<Button style={{ position: "relative", left: "2vw", width: "10vw", fontSize: "1vw", background: styles.gray, color: styles.lightCanvasColor, fontFamily: 'Fira Code', padding: 0, height: "2vw", borderRadius: ".2vw" }} variant="contained" onClick={() => { handleNPVSnap() }}  >PLOT ON GRAPH</Button>)
-    //return (<button style={snapNPVBtnStyle} name="npvsnap" onClick ={ () => {calcData.npvSnap.push({x: calcData.r, y: calcData.theNPV }); calcData.snapGraphX++; setNpvRan(npvRan + 1); }}>FIND NPV</button>  )
-  }
-  function handleNPVSnap() {
-    if (calcData.initialInvest != "") {
-      calcData.npvSnap.unshift([calcData.r, calcData.theNPV]);
-      setNpvRan(npvRan + 1);
-    }
-  }
+
+
 
   function plotButton() {
     let buttonStyle = {
@@ -832,33 +787,11 @@ function App() {
   // }
 
   function CashFlowContents() {
-    let dollColor = styles.positiveColor;
 
-
-    // if (calcData.initialInvest === "") {
-    //   zeroCashInputStyle.fontSize = ".8vw";
-    // }
-    // else if (calcData.initialInvest >= 0 && calcData.initialInvest != "") {
-    //   zeroCashInputStyle.fontSize = "2vw";
-    //   zeroCashInputStyle.color = styles.positiveColor;
-
-    // }
-    // else if (calcData.initialInvest < 0) {
-    //   zeroCashInputStyle.fontSize = "2vw";
-    //   zeroCashInputStyle.color = styles.negativeColor;
-    //   dollColor = styles.negativeColor;
-    // }
+  
     let contents = [];
 
-    // contents.push(
-    //   <div key={"initialentry"}>
-    //     <div style={{ position: "absolute", left: "2%", bottom: "100%" }}>{dollSymbol(0, dollColor)}</div>
-    //     <div style={negInitialInvStyle}>
-    //       <input style={zeroCashInputStyle} placeholder="<Enter Initial Investment Here>" key={"inINVhold"} type="text" name={"initialInv"} onChange={(event) => { calcData.initialInvest = parseFloat(event.target.value); handleCashFlowChange() }} />
-    //     </div>
-    //     <div style={lineBreak} />
-    //   </div>
-    // )
+
 
 
 

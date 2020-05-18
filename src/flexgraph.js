@@ -1,5 +1,5 @@
 import React from 'react';
-import { isCompositeComponent } from 'react-dom/test-utils';
+
 
 let globalStyles = {
     clickedPoint: null,

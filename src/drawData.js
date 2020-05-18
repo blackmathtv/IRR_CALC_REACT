@@ -1,20 +1,8 @@
 
-import React from 'react';
+
 import {calcData} from "./App.js";
 
-function getRectangleSVG(key, topLeftPoint, width, height, fill, strokeColor, strokeWidth, radius) {
-    return(
-        <rect 
-        key={key}
-        x={topLeftPoint[0]} y ={topLeftPoint[1]} //array [x,y]
-        width = {width} height = {height}
-        fill={fill} //string
-        stroke={strokeColor} //string
-        strokeWidth={strokeWidth} 
-        rx={radius}
-    />
-    )
-}
+
 
 function GetDrawData () {
     //console.log("Ran GetDrawData");
@@ -49,7 +37,7 @@ function GetDrawData () {
         }
     }
     
-    for (var value in calcData.modCashFlows) {
+    for (let value in calcData.modCashFlows) {
         if (calcData.modCashFlows[value] >= 0) {
             drawData.values.allBarValues.push(calcData.modCashFlows[value]);
             
@@ -63,7 +51,7 @@ function GetDrawData () {
     // drawData.values.viewHeightMultiplier = 92/drawData.values.allBarValues[0];
     
     
-    for (var value in calcData.modCashFlows) {
+    for (let value in calcData.modCashFlows) {
         if (calcData.modCashFlows[value] >= 0) {
             drawData.values.drawBarHeights.push(calcData.modCashFlows[value] * drawData.values.viewHeightMultiplier);
             drawData.points.numPoints.pos +=1;
