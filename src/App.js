@@ -3,13 +3,14 @@ import Sketch from './sketch'
 import './App.css';
 import Graph from './graph.js';
 import JellyJar, {jellyDisplay} from './jellyJar.js';
+import bubble from './svg/bubble2.svg'
+import help from './help.json'
 // import findIRR from './irr.js';
-
-
-import { getPathSVG, drawCanvas, FlexButton, DrawShapesGraph } from "./flexgraph.js";
+import { getPathSVG, drawCanvas, FlexButton} from "./flexgraph.js";
 
 
 
+console.log(help);
 export var modCashFlows = [];
 
 const dollarFormat = (number) => Intl.NumberFormat('en-US', {
@@ -39,14 +40,6 @@ export const commaDecimal = (number) => Intl.NumberFormat('en-US', {
   minimumFractionDigits: 2
 }).format(number);
 
-
-
-
-// let canvasWidth = window.innerWidth * .9;
-// let canvasHeight = canvasWidth / 2.32;
-
-
-
 export let calcData = {
   initialInvest: 0,
   cashFlows: [0, 0, 0, 0, 0],
@@ -54,6 +47,7 @@ export let calcData = {
   positiveFlows: [],
   negativeFlows: [],
   highestFlow: [],
+  highestModFlow: [],
   averagePositiveFlow: [],
   averageNegativeFlow: [],
   posFlowsTotal: 0,
@@ -89,8 +83,6 @@ export let styles = {
   secondRowHeight: "38%",
   lightBlue: "#47C4C1"
 }
-
-
 
 const calcCanvas = {
   position: "absolute",
@@ -131,38 +123,12 @@ const innerCashBox = {
   //fontWeight: "800"
 }
 
-// const cashContents = {
-//   fontSize: "2vw",
-//   width: "100%",
-//   height: "2.6vw",
-//   color: styles.positiveColor
-// }
 const cashContents = {
   background: "none",
   width: "100%",
   height: "2.6vw",
 }
-// const cashInputStyle = {
-//   position: "absolute",
-//   background: "none",
-//   width: "57%",
-//   height: "22%",
-//   left: "27%",
-//   fontSize: "1.8vw",
-//   border: "none",
-//   color: styles.positiveColor
-// }
 
-// const negCashInputStyle = {
-//   position: "absolute",
-//   background: "none",
-//   width: "57%",
-//   height: "22%",
-//   left: "27%",
-//   fontSize: "1.8vw",
-//   border: "none",
-//   color: styles.negativeColor
-// }
 const cashBottom = {
   position: "absolute",
   top: "88%",
@@ -175,17 +141,6 @@ const cashBottom = {
   color: styles.darkGray
 }
 
-
-// const negInitialInvStyle = {
-//   fontSize: "2vw",
-//   width: "auto",
-//   height: "2.6vw",
-//   marginLeft: "15%",
-//   color: styles.negativeColor,
-
-
-// }
-
 const lineBreak = {
   background: "#F0F0F0",
   height: "1px",
@@ -193,17 +148,6 @@ const lineBreak = {
   width: "75%",
   position: "absolute"
 }
-// const minusButtonStyle = {
-
-//   fill: styles.innerCashBoxColor,
-//   color: styles.medLightGray,
-//   stroke: styles.medLightGray,
-//   strokeWidth: "8%"
-// }
-// const minusLineStyle = {
-//   stroke: styles.medLightGray,
-//   strokeWidth: "8%"
-// }
 
 //.....DISCOUNT RATE BOX.........
 
@@ -263,19 +207,6 @@ const NpvStatBox = {
   overflowX: "hidden"
 }
 
-// const innerNpvStatBox = {
-//   position: "absolute",
-//   top: "65%", 
-//   background: styles.innerCashBoxColor,
-//   height: "15%",
-//   width: "100%",
-//   overflowY: "scroll",
-//   overflowX: "auto"
-//   //fontWeight: "800"
-// }
-
-
-
 const avgNPVHeader = {
 
   position: "relative",
@@ -287,12 +218,6 @@ const avgNPVHeader = {
   marginTop: "-.5vw",
   marginBottom: 0
 }
-// const histListContents = { 
-//   paddingTop: 0,
-//   width: "100%",
-//   height:"30%",
-//   color: styles.negativeColor
-// }
 
 //......GRAPH BOX.......
 
@@ -306,99 +231,11 @@ const graphBox = {
   borderRadius: styles.boxRadius
 }
 
-// const InstructionBox = {
-//   position: "absolute",
-//   top: styles.bottomRowPadTop,
-//   left: styles.calcPadLeft,
-//   background: '#FAEFC5',
-//   height: styles.secondRowHeight,
-//   width: "32.5%",
-//   borderRadius: styles.boxRadius
-// }
-
-
 const header1 = {
   fontWeight: "bold",
   fontSize: ".8vw",
   textAlign: "center"
 }
-
-
-// const header3 = {
-//   fontWeight: "bold",
-//   fontSize: "1.2vw",
-//   textAlign: "center"
-// }
-
-
-// const arrow1Style = {
-//   position: "static",
-//   background: "none",
-//   paddingLeft: "27%",
-//   paddingTop: "20%"
-// }
-
-
-
-
-// const snapButtonPos = {
-//   position: "absolute",
-//   bottom: "15%",
-
-
-// }
-// const histTitle = {
-//   position: "absolute",
-//   fontSize: "1vw",
-//   bottom: "33%",
-//   left: "8%",
-// }
-
-// const histTitle2 = {
-//   position: "absolute",
-//   fontSize: "1vw",
-//   bottom: "33%",
-//   right: "16%",
-// }
-// const instructionTitle = {
-//   display: "grid",
-//   fontSize: "1.1vw",
-//   fontFamily: 'Montserrat',
-//   textAlign: "center",
-//   fontWeight: "bold"
-// }
-// const instructTextStyle = {
-//   fontSize: ".6vw",
-//   fontFamily: 'Montserrat',
-//   paddingLeft: "5%",
-//   paddingRight: "5%",
-//   fontWeight: "regular"
-// }
-// const instructTextCenter = {
-//   fontSize: ".7vw",
-//   paddingLeft: "5%",
-//   paddingRight: "5%",
-//   textAlign: "center",
-//   fontWeight: "bold"
-// }
-
-
-
-// function instructionText() {
-//   return (
-//     <div>
-//       <p style={instructionTitle}>INSTRUCTIONS</p>
-//       <p style={instructTextStyle}>1. Enter as many cash flow periods as you'd like. The # inside the dollar sign represents the # of periods in the future where: </p>
-//       <p style={{ position: "absolute", left: "3vw", marginTop: "-3%" }}>{dollSymbol(0, "black")}</p>
-//       <p style={instructTextCenter}> = dollars in Period 0 (present day) </p>
-//       <p style={instructTextStyle}>2. When you adjust the discount rate, all future cash flows become "converted" into present day units.</p>
-//       <a style={instructTextStyle} href="url">See part 1 + 2 of NPV Video</a>
-//       <p style={instructTextStyle}>3. More instructions and links will go here in the finished version</p>
-
-//     </div>
-//   )
-// }
-
 
 function dollSymbol(value, color) {
   let numSize = .6;
@@ -411,16 +248,13 @@ function dollSymbol(value, color) {
   }
 
   return (
-
     <svg style={{ position: "absolute", background: "none" }} height="2.6vw" width="1.5vw" >
       <text key="dollarSymbol" style={{ fontSize: "2vw", fontWeight: "400", fill: color }} x="8%" y="75%">$</text>
       <circle key="dollcircle" style={{ fill: color }} cx="52%" cy="78%" r="18%" />
       <text key="innernumber" style={{ fontSize: numSize + "vw", fontWeight: "700", fill: styles.innerCashBoxColor }} x={numX} y={numY}>{value}</text>
     </svg>
-
   )
 }
-
 
 //the bottom arrow is getting shifted up whenever the page reloads for some reason
 
@@ -466,196 +300,42 @@ function npvResult() {
   return (
    <p style={style}>{npvResult}</p> 
   )
-
 }
 
- 
-// let counter = 0
-// let increase = Math.PI * 2/9.23;
-// let negCounter = 0
-// // let negIncrease = Math.PI * 2/9.24;
-// let negIncrease = Math.PI * 2/9.41;
-// function jellyJar() {
+let HelpButton = (mouseDown, mouseOver) => {
+  let col = styles.darkGray;
+  let activeCol= styles.lightBlue;
+  let color = col;
 
+  const [active, setActive] = React.useState(false);
+  let activeOut = "true";
 
-//   calcData.posFlowsTotal = 0;
-//   calcData.negFlowsTotal = 0;
-//   calcData.highestFlow = [];
-//   calcData.positiveFlows = [];
-//   calcData.negativeFlows = [];
-//   calcData.averagePositiveFlow = [];
-//   calcData.averageNegativeFlow = [];
+  if (active) {
+    color = activeCol
+    activeOut = "false"
+  }
+  else {
+    color = col
+    activeOut = "true"
+  }
 
-//   for (let flow in calcData.modCashFlows) {
-//     let flowValue = calcData.modCashFlows[flow];
-  
-//     if (flowValue > 0) {
-//       if (flowValue > calcData.highestFlow) {
-//         calcData.highestFlow = flowValue;
-//       }
-//       calcData.positiveFlows.push(flowValue);
-//       calcData.posFlowsTotal += flowValue;
-//     }
-//     else if (flowValue < 0) {
-//       let inverseFlowValue = flowValue * -1;
+  return (
+    <svg active={activeOut} style={{userSelect: "none", cursor: "pointer", background: "none", position: "absolute", right: ".5vw", borderRadius: "0vw", marginTop: ".5vw"}} height="1.8vw" width="1.8vw" onMouseDown={() => {mouseDown(); active ? setActive(false) : setActive(true); }} >
+      <text style={{ fontSize: "1.4vw"}} fill={color} x="25%" y="78%">?</text>
+      <rect
+          x={"5%"} y={"12%"} //array [x,y]
+          width="86%" height="86%"
+          fill="none" //string
+          stroke={color} //string
+          strokeWidth=".05vw"
+          rx={0}
+          style={{userSelect: "none"}}
+      />
+    </svg>
+  )
+}
 
-//       if (inverseFlowValue > calcData.highestFlow) {
-//         calcData.highestFlow = inverseFlowValue;
-//       }
-//       calcData.negativeFlows.push(inverseFlowValue);
-//       calcData.negFlowsTotal += inverseFlowValue;
-//     }
-//   }
-//   if (calcData.posFlowsTotal !== 0) {
-//     calcData.averagePositiveFlow = calcData.posFlowsTotal/calcData.modCashFlows.length;
-//   }
-//   if (calcData.negFlowsTotal !== 0) {
-//     calcData.averageNegativeFlow = calcData.negFlowsTotal/calcData.modCashFlows.length;
-//   }
-
-//   let containerHeight = calcData.highestFlow;
-//   let heightMultiplier = containerHeight / 96;
-//   let negativeLiquidHeight = Number(calcData.averageNegativeFlow/heightMultiplier) + 2;
-//   let positiveLiquidHeight = Number(calcData.averagePositiveFlow/heightMultiplier) + 2;
-
-
-
-
-
-
-//   // calcData.positiveFlows.sort();
-//   // calcData.negativeFlows.sort();
-
-
-
-//   let jellyStyles = {
-//     canvasWidth: "15vw",
-//     canvasHeight: "11vw",
-//     canvasPadLeft: "-.7vw",
-//     canvasPadTop: 0,
-//     lineSize: .2,
-//     fontSize: 2,
-//     fontColor: "none",
-//     axisColor: "none",
-//     boxAxisColor: styles.darkGray,
-//     boxRadius: .5,
-//     axisLineSize: .2,
-
-//     tickColor: "none",
-//     tickLineSize: .1,
-//     clickPointColor: "#C18FE4",
-//     pointSize: 1,
-//     selectedPointSize: 2,
-
-
-//     markerLineSize: .3,
-//     canvasColor: "none",
-// }
-//   let positiveLiquidDraw = [];
-//   let negativeLiquidDraw = [];
-
-  
-//   //wave animation on slider change
-//   function getSine(isPositive) {
-
-//   if (isPositive === true) {
-//    counter += increase
-//    let y = Math.sin(counter) /2 + .5;
-//    console.log(y);
-//    return y * 3
-   
-//   }
-//   else {
-//     negCounter += negIncrease
-//     let y = Math.sin(negCounter) /2 + .5;
-//     return y *1.5
-
-//   }
-    
-//   }
-
-// //load default data if none present "#F50057" "#27293E"
-//     if (positiveLiquidHeight > 2) {
-      
-//       positiveLiquidDraw.push([98, 2], [98, positiveLiquidHeight + negativeLiquidHeight + getSine(true)]);
-
-//       for (let i = 92; i > 2; i -= 8) {
-//         positiveLiquidDraw.push([i, positiveLiquidHeight + negativeLiquidHeight + getSine(true)])
-//       }
-
-//      positiveLiquidDraw.push( [2, positiveLiquidHeight + negativeLiquidHeight + getSine(true)], [2, 2]);
-//     }
-    
-
-//     if (negativeLiquidHeight > 2) {
-//       negativeLiquidDraw.push([98, 2], [98, negativeLiquidHeight + getSine(false)]);
-//       for (let i = 92; i > 2; i -= 8) {
-//         negativeLiquidDraw.push([i, negativeLiquidHeight + getSine(false)])
-//       }
-
-//       negativeLiquidDraw.push([2, negativeLiquidHeight + getSine(false)], [2, 2] )
-  
-//     }
-
-//     let data = {
-//       "#27293E": positiveLiquidDraw,
-//       "#F50057": negativeLiquidDraw
-//     }
-
-
-
-    
-//   return DrawShapesGraph(data, jellyStyles);
-// }
-
-// function jellyDisplay() {
-//   let posStyle = {
-//     fontWeight: "medium",
-//     color : styles.positiveColor,
-//     fontSize: "1vw",
-//     textAlign: "center",
-//     margin: 0,
-//   }
-
-//   let plusStyle = {
-//     fontWeight: "bold",
-//     color : styles.canvasColor,
-//     fontSize: ".8vw",
-//     textAlign: "center",
-//     margin: "-.2vw",
-//   }
-
-//   let negStyle = {
-//     fontWeight: "medium",
-//     color : styles.negativeColor,
-//     fontSize: "1vw",
-//     textAlign: "center",
-//     marginLeft: "",
-//     marginTop: 0,
-//     marginBottom: 0,
-//   }
-//   function negOutput() {
-//     if (calcData.negFlowsTotal !== 0) {
-//       return commaDecimal(calcData.negFlowsTotal * -1);
-//     }
-//     else {
-//       return 0;
-//     }
-//   }
-
- 
-//   return (
-//     <div style = {{position: "absolute", width: "100%",height: "16%", bottom: "1%", background: "none"}}>
-//       <p style = {posStyle}>{commaDecimal(calcData.posFlowsTotal)}</p>
-//       <p style = {plusStyle}>+</p>
-//       <p style = {negStyle}>{negOutput()}</p>
-//     </div>
-//   )
-// }
 function App() {
-
-
-
 
   //hook that makes sure dom is rerendered if a button is clicked, even if theNpv hasn't changed
   const [npvRan, setNpvRan] = React.useState(0);
@@ -668,12 +348,12 @@ function App() {
         style={{
           position: "absolute",
           // background: "none",
-          width: "3.3vw",
+          width: "3.1vw",
           // height: "2.6vw",
           top: "-.4vw",
           left: "7.4vw",
-          fontSize: "1.2vw",
-          borderWidth: ".1vw",
+          fontSize: "1.1vw",
+          borderWidth: ".05vw",
           color: styles.lightBlue
         }}
         key={"rorinput"}
@@ -696,13 +376,26 @@ function App() {
 
 
     return (
-      <div style={DRateText}>RATE OF RETURN:{percentBox()}<p style = {{ fontSize: "1.4vw", position: "absolute", top: "-2vw", left: "11vw", color: styles.lightBlue}}>%</p></div>
+      <div style={DRateText}>RATE OF RETURN:{percentBox()}<p style = {{ fontSize: "1.3vw", position: "absolute", top: "-2vw", left: "11vw", color: styles.lightBlue}}>%</p></div>
     )
   }
 
 
   function handleCashFlowChange() {
     calcData.allNpvPoints = [];
+    calcData.highestFlow = 0;
+    //set highest flow 
+    for (let flow in calcData.cashFlows) {
+      let value = parseFloat(calcData.cashFlows[flow])
+      if (value < 0) {
+        value *= -1;
+      }
+      if (value > calcData.highestFlow) {
+        calcData.highestFlow = value
+      }
+    }
+
+    console.log(calcData.highestFlow);
     let yearZero = removeCommas(calcData.cashFlows[0]);
     calcData.initialInvest = yearZero;
     //find the npv for every point between 1 and 100
@@ -735,7 +428,34 @@ function App() {
     )
   }
 
-  // function autoButton() {
+  const [helpBlurb, setHelpBlurb] = React.useState([]);
+ 
+  let helpButtonAction = () => {
+    if (helpButton.props.active === "false") {
+      console.log("false")
+      setHelpBlurb([]);
+    
+     
+    }
+    else {
+      console.log("false");
+      setHelpBlurb(
+        <div className="container" style = {{position: "absolute", borderRadius: styles.boxRadius, color: "styles.lightCanvasColor", background: "none", right: "2.5vw", opacity: 1, top: "1vw", width: "21.5vw", height: "10vw"}}>
+          <img style={{position: "absolute"}} src={bubble} />
+          <div style = {{margin: 0, padding: 0, background: "none", fontSize: "1vw", top: ".2vw", fontWeight: "bold", left: "2%", color: styles.lightCanvasColor , position: "absolute", width: "92%"}}>{help.header}</div>
+          <div style = {{margin: 0, padding: 0, background: "none", fontSize: "1vw", top:"1.8vw",left: "2%", color: styles.lightCanvasColor , position: "absolute", width: "92%"}}>{help.text}</div>
+          <a style = {{margin: 0, padding: 0, background: "none", fontSize: "1.2vw", fontWeight: "bold", bottom:"1.4vw",left: "28%", color: styles.lightCanvasColor , position: "absolute", width: "92%"}} href={help.link} target="_blank">WATCH VIDEO</a>
+        </div>
+      );
+      
+      console.log(helpBlurb)
+    }
+  }
+
+  let helpButton = HelpButton(helpButtonAction);
+  console.log(helpButton);
+
+  // function autoButton() { 
   //   return (
   //     <div>
   //       <button onClick={() => { calcData.irr = Math.round((findIRR(calcData.cashFlows, calcData.initialInvest)[0]) * 100) / 100; setNpvRan(npvRan + 1) }}>AUTO IRR</button>
@@ -743,11 +463,6 @@ function App() {
   //     </div>
   //   )
   // }
-
-
-
-
-
 
   function plotButton() {
     let buttonStyle = {
@@ -780,8 +495,7 @@ function App() {
       canvasWidth: "60%",
       canvasHeight: "12%",
       canvasPadLeft: "20%",
-      canvasPadTop: "39%",
-     
+      canvasPadTop: "39%",  
       btnColor: styles.gray,
       btnStrokeColor: "none",
       btnStrokeWidth: 1,
@@ -797,43 +511,8 @@ function App() {
     return FlexButton("addmoreButton", buttonStyle, mouseDown)
   }
 
-  // function logNPV() {
-
-  //   loggedNPVs.unshift(
-  //     <div style = {histListContents}>
-  //       <svg style={{ position: "absolute", background: "none"}} height="30%" width="100%">
-  //         <text style={{ fontSize: "1.2vw" }} x="0" y="70%">{calcData.theNPV.toFixed(2)}</text>
-  //         <text style={{ fontSize: "1.2vw" }} x="75%" y="70%">{calcData.r}%</text>
-  //       </svg>
-  //     </div>
-  //     )
-  // }
-  // let drawArrows = {};
-  // React.useEffect(()=> {
-
-
-
-  // });
-  // let zeroCashInputStyle = {
-
-  //   position: "absolute",
-  //   background: "none",
-  //   width: "80%",
-  //   height: "22%",
-  //   fontSize: ".7vw",
-  //   border: "none",
-  //   color: styles.positiveColor
-  // }
-
-  function CashFlowContents() {
-
-  
+  function CashFlowContents() { 
     let contents = [];
-
-
-
-
-
     for (let value in calcData.cashFlows) {
       let color = styles.positiveColor;
 
@@ -869,8 +548,6 @@ function App() {
       )
 
     }
-  
-
     return (contents)
   }
   
@@ -880,11 +557,9 @@ function App() {
     )
   }
 
-
-
   return (
     <div style={calcCanvas}> 
-    
+  
       {drawArrows()}
       <p style={calcTitle}>NET PRESENT VALUE CALCULATOR</p>
 
@@ -923,26 +598,17 @@ function App() {
         {Graph()}
       </div>
       {plotButton()}
-
-
-
-
+      {helpButton}
+      {helpBlurb}
 
     </div>
   )
 
   function findNPV(cashFlows, r) {
-    //push r value to interface 
-
+    // setHelpBlurb([]);
     //ensures DOM will update even if npv didnt change
-    setNpvRan(npvRan + 1);
-
-
-
-    
+    setNpvRan(npvRan + 1);  
     let yearZero = removeCommas(cashFlows[0]);
-
-
     let npvOut = null;
     let rDec = r / 100;
     let npv = null;
@@ -951,50 +617,16 @@ function App() {
     calcData.modCashFlows.push(yearZero);
     calcData.initialInvest = yearZero;
     for (let flow = 1; flow < cashFlows.length; flow++) {
-      let cashFlow = removeCommas(cashFlows[flow]);
-      
+      let cashFlow = removeCommas(cashFlows[flow]);  
       let powerOf = parseInt(flow);
       let discountedFlow = cashFlow / Math.pow(1 + rDec, powerOf);
       calcData.modCashFlows.push(discountedFlow);
       npv += discountedFlow;
     }
-
     npvOut = Math.round((npv + yearZero) * 100) / 100;
-
     calcData.avgNpvYr = (npvOut / (cashFlows.length)).toFixed(2);
     calcData.theNPV = npvOut.toFixed(2);
-
-    //return (npvOut);
   }
-  //{calcData.cashFlows.map((number) => <li key ={number.toString()}>{number}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 

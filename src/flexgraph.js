@@ -10,9 +10,7 @@ const commaFormat = (number) => Intl.NumberFormat().format(number);
 function rndNearTenth(num) {
     return Math.round(num * 100) / 100;
 }
-function invertHex(hex) {
-    return "#" + (Number(`0x1${hex.slice(1)}`) ^ 0xFFFFFF).toString(16).substr(1).toUpperCase()
-}
+
 
 function diff(a, b) { return Math.abs(a - b); }
 
@@ -41,7 +39,7 @@ export function getRectangleSVG(key, styles, mouseDown, mouseOut, mouseOver, mou
             onMouseOut={mouseOut}
             onMouseOver={mouseOver}
             opacity={styles.opacity}
-            style={{ cursor: styles.cursor, boxShadow: "1px 3px 1px #9E9E9E" }}
+            style={{userSelect: "none", cursor: styles.cursor, boxShadow: "1px 3px 1px #9E9E9E" }}
         />
     )
 }
@@ -404,12 +402,16 @@ export function getYAxisSVG(sortedData, styles) {
     let rulerPosition = 100 - sortedData.padTop;
     for (let i = 0; i <= styles.yTicks; i++) {
         let yValue = sortedData.yMin + (rulerStep * i);
+        let roundTenth = commaFormat(rndNearTenth(yValue));
+        let roundInt = commaFormat(Math.round(yValue));
+        let intLeft  = () => {if (roundInt.length <= 10) { return roundInt.length/2} else {return 5}};
+        let tenthLeft = () => {if (roundTenth.length <= 10) { return roundTenth.length/2} else {return 5}};
         //push ruler values to text array spaced out evenly, if there is a small differrence, round to the nearest 10th
         if (sortedData.yDiff > 50) {
-            textArray.push(getTextSVG("yrulervalue" + i, commaFormat(Math.round(yValue)), [(sortedData.padLeft / 4) + "%", rulerPosition - (rulerOffset * i) + "%"], styles.fontSize, styles.fontColor));
+            textArray.push(getTextSVG("yrulervalue" + i, roundInt, [(sortedData.padLeft /2) -intLeft() + "%", rulerPosition - (rulerOffset * i) + "%"], styles.fontSize, styles.fontColor));
         }
         else {
-            textArray.push(getTextSVG("yrulervalue" + i, commaFormat(rndNearTenth(yValue)), [(sortedData.padLeft / 4) + "%", rulerPosition - (rulerOffset * i) + "%"], styles.fontSize, styles.fontColor));
+            textArray.push(getTextSVG("yrulervalue" + i, roundTenth, [(sortedData.padLeft/2) -tenthLeft() + "%", rulerPosition - (rulerOffset * i) + "%"], styles.fontSize, styles.fontColor));
 
         }
 
@@ -442,7 +444,7 @@ export function getmarkerLine(sortedData, styles) {
         let range = [[], []];
         range = [[sortedData.padLeft, y], [100 - sortedData.padLeft, y]];
         let path = getPathSVG("markerLine", styles, range, styles.markerLineColor, styles.markerLineSize, false, 1);
-        let text = getTextSVG("0LineMark", "0 (IRR)", [100 - sortedData.padLeft / 1.2, y + "%"], styles.fontSize, styles.markerLineColor)
+        let text = getTextSVG("0LineMark", "0", [100 - sortedData.padLeft / 1.2, y + "%"], styles.fontSize, styles.markerLineColor)
         return (
             <svg key="markerLine">
                 {text}

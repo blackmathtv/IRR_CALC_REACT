@@ -5,19 +5,23 @@ import {DrawShapesGraph} from './flexgraph.js'
 let blueCounter = 0
 
 //for the non build verion, use .69
-let blueIncrease = .91;
-
+// let flowForward = .91;
+let flowForward = .905;
+let flowForwardFast = .91;
 
 let redCounter = 0
 // let negIncrease = Math.PI * 2/9.24;
-let redIncrease = .892;
+// let flowBackward = .892;
+let flowBackward = .89;
+let prevBlueHeight = 0;
+let prevRedHeight = 0;
 export default function JellyJar() {
 
 
 
   calcData.posFlowsTotal = 0;
   calcData.negFlowsTotal = 0;
-  calcData.highestFlow = [];
+  calcData.highestModFlow = [];
   calcData.positiveFlows = [];
   calcData.negativeFlows = [];
   calcData.averagePositiveFlow = [];
@@ -27,8 +31,8 @@ export default function JellyJar() {
     let flowValue = calcData.modCashFlows[flow];
   
     if (flowValue > 0) {
-      if (flowValue > calcData.highestFlow) {
-        calcData.highestFlow = flowValue;
+      if (flowValue > calcData.highestModFlow) {
+        calcData.highestModFlow = flowValue;
       }
       calcData.positiveFlows.push(flowValue);
       calcData.posFlowsTotal += flowValue;
@@ -36,8 +40,8 @@ export default function JellyJar() {
     else if (flowValue < 0) {
       let inverseFlowValue = flowValue * -1;
 
-      if (inverseFlowValue > calcData.highestFlow) {
-        calcData.highestFlow = inverseFlowValue;
+      if (inverseFlowValue > calcData.highestModFlow) {
+        calcData.highestModFlow = inverseFlowValue;
       }
       calcData.negativeFlows.push(inverseFlowValue);
       calcData.negFlowsTotal += inverseFlowValue;
@@ -51,7 +55,7 @@ export default function JellyJar() {
   }
 
   let containerHeight = calcData.highestFlow;
-  let heightMultiplier = containerHeight / 96;
+  let heightMultiplier = containerHeight / 92;
   let negativeLiquidHeight = Number(calcData.averageNegativeFlow/heightMultiplier) + 2;
   let positiveLiquidHeight = Number(calcData.averagePositiveFlow/heightMultiplier) + 2;
 
@@ -94,15 +98,26 @@ export default function JellyJar() {
   
   //wave animation on slider change
   function getRedSine() {
-    redCounter += redIncrease
+    // console.log("prev " + prevRedHeight + " current " + negativeLiquidHeight)
+    // if (prevRedHeight < negativeLiquidHeight) {
+    // redCounter += flowBackward
+    // }
+    // else {
+      redCounter += flowForward
+    // }
     let redy = Math.sin(redCounter) /2 + .5;
-    return redy *1.5
+    return redy *2.5
   }
-  function getSine(isPositive) {
-
-   blueCounter += blueIncrease
+  function getSine() {
+    // if (prevBlueHeight < positiveLiquidHeight) {
+    //   blueCounter += flowForward
+    // }
+    // else {
+      blueCounter += flowForwardFast
+    // }
+ 
    let y = Math.sin(blueCounter) /2 + .5;
-   return y * 3
+   return y * 2.5
    
 
     
@@ -110,16 +125,15 @@ export default function JellyJar() {
 
 //load default data if none present "#F50057" "#27293E"
     if (positiveLiquidHeight > 2) {
-      
-      positiveLiquidDraw.push([98, 2], [98, positiveLiquidHeight + negativeLiquidHeight + getSine()]);
+      let height = positiveLiquidHeight + negativeLiquidHeight;
+      positiveLiquidDraw.push([98, 2], [98, height + getSine()]);
 
-      for (let i = 92; i > 2; i -= 8) {
-        positiveLiquidDraw.push([i, positiveLiquidHeight + negativeLiquidHeight + getSine()])
+      for (let i = 92; i > 2; i -= 8) { 
+        positiveLiquidDraw.push([i, height + getSine()])
       }
-
-     positiveLiquidDraw.push( [2, positiveLiquidHeight + negativeLiquidHeight + getSine()], [2, 2]);
+      
+     positiveLiquidDraw.push( [2, height + getSine()], [2, 2]);
     }
-    
 
     if (negativeLiquidHeight > 2) {
       negativeLiquidDraw.push([98, 2], [98, negativeLiquidHeight + getRedSine()]);
@@ -137,9 +151,10 @@ export default function JellyJar() {
     }
 
 
- //<input style = {{position: "absolute", top: -120}} onChange={(event) => {blueIncrease = parseFloat(event.target.value); console.log(blueIncrease)}}></input>
+ //<input style = {{position: "absolute", top: -120}} onChange={(event) => {flowForward = parseFloat(event.target.value); console.log(flowForward)}}></input>
 
-    
+  prevBlueHeight = positiveLiquidHeight;
+  prevRedHeight = negativeLiquidHeight;
   return (
    
         DrawShapesGraph(data, jellyStyles)
