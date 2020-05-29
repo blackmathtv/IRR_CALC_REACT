@@ -9,8 +9,6 @@ import help from './help.json'
 import { getPathSVG, drawCanvas, FlexButton} from "./flexgraph.js";
 
 
-
-console.log(help);
 export var modCashFlows = [];
 
 const dollarFormat = (number) => Intl.NumberFormat('en-US', {
@@ -395,7 +393,6 @@ function App() {
       }
     }
 
-    console.log(calcData.highestFlow);
     let yearZero = removeCommas(calcData.cashFlows[0]);
     calcData.initialInvest = yearZero;
     //find the npv for every point between 1 and 100
@@ -432,13 +429,13 @@ function App() {
  
   let helpButtonAction = () => {
     if (helpButton.props.active === "false") {
-      console.log("false")
+
       setHelpBlurb([]);
     
      
     }
     else {
-      console.log("false");
+   
       setHelpBlurb(
         <div className="container" style = {{position: "absolute", borderRadius: styles.boxRadius, color: "styles.lightCanvasColor", background: "none", right: "2.5vw", opacity: 1, top: "1vw", width: "21.5vw", height: "10vw"}}>
           <img style={{position: "absolute"}} src={bubble} />
@@ -448,12 +445,11 @@ function App() {
         </div>
       );
       
-      console.log(helpBlurb)
+ 
     }
   }
 
   let helpButton = HelpButton(helpButtonAction);
-  console.log(helpButton);
 
   // function autoButton() { 
   //   return (
