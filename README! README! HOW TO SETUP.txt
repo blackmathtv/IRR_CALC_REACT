@@ -1,6 +1,11 @@
+IMPORTANT: this tool will work with es6 compatible browsers such as edge, firefox, chrome, and safari.(not internet explorer)
+
+You can change the contents of the help bubble within the help.json file in /src and rebuilding with npm run build
+
 To get this app working, the build folder (in this file's parent folder) needs to be on a webserver
 Then, on the page you want the calculator to be displayed on, embed the calculator within an iframe. There 
 is an example in embeddedAppExample.html
+
 
 
 setting up a test server:
